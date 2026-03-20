@@ -511,35 +511,28 @@
 }
 
 
-  /* ── BOTÓN INICIO FLOTANTE ── */
+  /* home-btn — SIEMPRE visible, flotante */
   #home-btn {
-    position: fixed;
-    bottom: 22px;
-    right: 22px;
-    z-index: 2147483647;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    border: 3px solid rgba(255,255,255,0.7);
-    background: #1a6e2e;
-    color: white;
-    font-size: 26px;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0,0,0,.5), 0 0 0 4px rgba(26,110,46,.25);
-    display: none;
-    align-items: center;
-    justify-content: center;
+    display: block !important;
+    position: fixed !important;
+    bottom: 18px !important;
+    right: 18px !important;
+    z-index: 2147483647 !important;
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 50% !important;
+    border: 3px solid rgba(255,255,255,0.8) !important;
+    background: #1a6e2e !important;
+    color: white !important;
+    font-size: 28px !important;
+    line-height: 58px !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,.6) !important;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    /* NO usar transform aquí — rompe position:fixed en móvil con zoom */
   }
-  #home-btn.visible {
-    display: flex;
-  }
-  #home-btn:active {
-    background: #2e7d32;
-    box-shadow: 0 2px 10px rgba(0,0,0,.4);
+  #home-btn:active { background: #2e7d32 !important; }0,0,.4);
   }eZ(0) scale(0.92) !important;
   }
 
@@ -1242,8 +1235,6 @@ function showTab(id, btn) {
   if (panel) panel.classList.add('active');
   btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   // Show/hide home button
-  const homeBtn = document.getElementById('home-btn');
-  if (homeBtn) homeBtn.classList.add('visible');
 }
 
 function updateItemEstado(parkId, itemIdx, select) {
@@ -1783,8 +1774,6 @@ const _origShowTab      = showTab;
 // showTab: switch panel + init map + toggle home button
 window.showTab = function(id, btn) {
   _origShowTab(id, btn);
-  const homeBtn = document.getElementById('home-btn');
-  if (homeBtn) homeBtn.classList.add('visible');
   if (id !== 'general') {
     const p = parques.find(x => x.id === id);
     if (p) {
@@ -1824,11 +1813,49 @@ document.getElementById('tab-general').onclick = function() {
 buildUI();
 loadFromFirebase();
 // Botón home siempre visible
-document.getElementById('home-btn').classList.add('visible');
 
 </script>
 
 <script>
+// ================================================================
+// BOTÓN HOME FLOTANTE — posicionado y mantenido por JS
+// ================================================================
+(function() {
+  function posicionarHome() {
+    var btn = document.getElementById('home-btn');
+    if (!btn) return;
+    // Posición fija desde la esquina inferior derecha de la VENTANA
+    var margen = 18;
+    btn.style.position  = 'fixed';
+    btn.style.bottom    = margen + 'px';
+    btn.style.right     = margen + 'px';
+    btn.style.top       = 'auto';
+    btn.style.left      = 'auto';
+    btn.style.zIndex    = '2147483647';
+  }
+
+  function mostrarHome() {
+    posicionarHome();
+  }
+
+  // Posicionar al cargar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mostrarHome);
+  } else {
+    mostrarHome();
+  }
+
+  // Reposicionar al hacer scroll, resize y orientación
+  window.addEventListener('scroll',      posicionarHome, { passive: true });
+  window.addEventListener('resize',      posicionarHome, { passive: true });
+  window.addEventListener('orientationchange', function() {
+    setTimeout(posicionarHome, 300);
+  });
+
+  // Reposicionar cada 500ms como seguro extra (por zoom en móvil)
+  setInterval(posicionarHome, 500);
+})();
+
 // ================================================================
 // EXPORTAR A EXCEL — script global (fuera del módulo ES)
 // ================================================================
