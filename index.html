@@ -1146,98 +1146,111 @@ function buildUI() {
 }
 
 function buildParkPanel(p, num) {
+  const id = p.id;
+
   let infraHtml = '';
   if (p.infraestructura.length > 0) {
-    infraHtml = '<div class="section"><div class="section-title">Ficha de Necesidades — Infraestructura y Equipo</div>' +
-      '<table class="needs-table"><thead><tr><th>#</th><th>Elemento</th><th>Indicador</th>' +
-      '<th>Estado</th><th>Meta / Cantidad</th><th>Observación</th></tr></thead><tbody>' +
-      p.infraestructura.map((it, i) =>
-        '<tr>' +
-        '<td style="color:#bbb;font-family:monospace;font-size:.78rem">' + (i+1) + '</td>' +
-        '<td><strong>' + it.item + '</strong></td>' +
-        '<td style="color:#555">' + (it.indicador || '—') + '</td>' +
-        '<td><select class="estado-select estado-pendiente" id="item-estado-' + p.id + '-' + i + '" onchange="updateItemEstado('' + p.id + '',' + i + ',this)">' +
-          '<option value="pendiente">⏳ Pendiente</option>' +
-          '<option value="en-proceso">🔄 En proceso</option>' +
-          '<option value="completado">✅ Completado</option>' +
-        '</select></td>' +
-        '<td><input class="meta-input" type="text" id="item-meta-' + p.id + '-' + i + '" ' +
-          'placeholder="' + (it.meta || '—') + '" ' +
-          'oninput="saveItemMeta('' + p.id + '',' + i + ',this.value)"></td>' +
-        '<td style="color:#888;font-size:.78rem">' + (it.obs || '') + '</td>' +
-        '</tr>'
-      ).join('') +
-      '</tbody></table></div>';
+    const rows = p.infraestructura.map((it, i) => {
+      const obs = (it.obs || '').replace(/'/g, '&#39;');
+      const meta = (it.meta || '—').replace(/'/g, '&#39;');
+      return `<tr>
+        <td style="color:#bbb;font-family:monospace;font-size:.78rem">${i+1}</td>
+        <td><strong>${it.item}</strong></td>
+        <td style="color:#555">${it.indicador || '—'}</td>
+        <td><select class="estado-select estado-pendiente" id="item-estado-${id}-${i}"
+          onchange="updateItemEstado('${id}',${i},this)">
+          <option value="pendiente">⏳ Pendiente</option>
+          <option value="en-proceso">🔄 En proceso</option>
+          <option value="completado">✅ Completado</option>
+        </select></td>
+        <td><input class="meta-input" type="text" id="item-meta-${id}-${i}"
+          placeholder="${meta}" oninput="saveItemMeta('${id}',${i},this.value)"></td>
+        <td style="color:#888;font-size:.78rem">${obs}</td>
+      </tr>`;
+    }).join('');
+    infraHtml = `<div class="section">
+      <div class="section-title">Ficha de Necesidades — Infraestructura y Equipo</div>
+      <table class="needs-table">
+        <thead><tr><th>#</th><th>Elemento</th><th>Indicador</th><th>Estado</th><th>Meta / Cantidad</th><th>Observación</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
   }
 
   let obsHtml = '';
   if (p.observaciones && p.observaciones.length > 0) {
-    obsHtml = '<div class="section"><div class="section-title">Observaciones del Diagnóstico</div>' +
-      '<ul class="obs-list">' + p.observaciones.map(o => '<li>' + o + '</li>').join('') + '</ul></div>';
+    const items = p.observaciones.map(o => `<li>${o}</li>`).join('');
+    obsHtml = `<div class="section">
+      <div class="section-title">Observaciones del Diagnóstico</div>
+      <ul class="obs-list">${items}</ul></div>`;
   }
 
-  return (
-    '<div class="park-hero">' +
-      '<div>' +
-        '<h2 style="font-size:1.1rem;font-weight:700;color:var(--verde-oscuro)">🌳 ' + p.nombre + '</h2>' +
-        '<a href="' + p.mapsUrl + '" target="_blank" style="font-size:.78rem;color:var(--verde)">📍 Ver en Google Maps ↗</a>' +
-      '</div>' +
-      '<div style="display:flex;align-items:center;gap:8px;margin-top:8px">' +
-        '<span style="font-size:.78rem;color:#888">Avance:</span>' +
-        '<div style="flex:1;height:8px;background:#e8f0e8;border-radius:4px;overflow:hidden">' +
-          '<div id="bar-' + p.id + '" style="width:0%;height:100%;background:linear-gradient(90deg,#56c169,#1a6e2e);border-radius:4px;transition:width .4s"></div>' +
-        '</div>' +
-        '<span id="pct-' + p.id + '" style="font-size:.78rem;font-weight:700;color:var(--verde-oscuro);min-width:32px">0%</span>' +
-      '</div>' +
-    '</div>' +
-    '<div class="section">' +
-      '<div class="section-title">📡 Ubicación en Mapa</div>' +
-      '<div class="map-toolbar">' +
-        '<button class="layer-btn active" id="btn-osm-' + p.id + '" onclick="swLayer('' + p.id + '','osm')">🗺️ Calles (OSM)</button>' +
-        '<button class="layer-btn" id="btn-sat-' + p.id + '" onclick="swLayer('' + p.id + '','sat')">🛰️ Satélite</button>' +
-        '<button class="layer-btn" id="btn-topo-' + p.id + '" onclick="swLayer('' + p.id + '','topo')">⛰️ Topográfico</button>' +
-      '</div>' +
-      '<div class="map-container"><div id="map-' + p.id + '"></div></div>' +
-    '</div>' +
-    infraHtml + obsHtml +
-    '<div class="section"><div class="section-title">Seguimiento y Metas</div>' +
-      '<div class="seguimiento-area">' +
-        '<div class="seguimiento-field"><label>Estatus general</label>' +
-          '<select id="seg-estatus-' + p.id + '" onchange="saveSeg('' + p.id + '')">' +
-            '<option value="pendiente">⏳ Sin iniciar</option>' +
-            '<option value="en-proceso">🔄 En proceso</option>' +
-            '<option value="avanzado">📈 Avanzado</option>' +
-            '<option value="completado">✅ Completado</option>' +
-          '</select></div>' +
-        '<div class="seguimiento-field"><label>Prioridad</label>' +
-          '<select id="seg-prio-' + p.id + '" onchange="saveSeg('' + p.id + '')">' +
-            '<option value="alta">🔴 Alta</option>' +
-            '<option value="media" selected>🟡 Media</option>' +
-            '<option value="baja">🟢 Baja</option>' +
-          '</select></div>' +
-        '<div class="seguimiento-field"><label>Responsable</label>' +
-          '<input type="text" id="seg-resp-' + p.id + '" placeholder="Nombre del responsable" oninput="saveSeg('' + p.id + '')"></div>' +
-        '<div class="seguimiento-field"><label>Presupuesto estimado (MXN)</label>' +
-          '<input type="text" id="seg-pres-' + p.id + '" placeholder="Ej. $50,000" oninput="saveSeg('' + p.id + '')"></div>' +
-        '<div class="seguimiento-field"><label>Fecha de inicio</label>' +
-          '<input type="date" id="seg-finicio-' + p.id + '" onchange="saveSeg('' + p.id + '')"></div>' +
-        '<div class="seguimiento-field"><label>Fecha meta</label>' +
-          '<input type="date" id="seg-fmeta-' + p.id + '" onchange="saveSeg('' + p.id + '')"></div>' +
-        '<div class="seguimiento-field full"><label>Notas de seguimiento</label>' +
-          '<textarea id="seg-notas-' + p.id + '" placeholder="Describe avances, acuerdos, pendientes…" oninput="saveSeg('' + p.id + '')"></textarea></div>' +
-      '</div>' +
-      '<button class="btn-save" onclick="saveSeg('' + p.id + ''); showOk('ok-' + p.id + '')">💾 Guardar seguimiento</button>' +
-      '<span class="save-ok" id="ok-' + p.id + '">✔ Guardado</span>' +
-    '</div>' +
-    '<div class="section"><div class="section-title">Bitácora de Actividades</div>' +
-      '<ul class="log-list" id="log-' + p.id + '"></ul>' +
-      '<div class="add-log-row">' +
-        '<input type="text" id="loginput-' + p.id + '" placeholder="Registrar actividad realizada…" ' +
-          'onkeydown="if(event.key==='Enter')addLog('' + p.id + '')">' +
-        '<button onclick="addLog('' + p.id + '')">+ Agregar</button>' +
-      '</div>' +
-    '</div>'
-  );
+  return `
+    <div class="park-hero">
+      <div>
+        <h2 style="font-size:1.1rem;font-weight:700;color:var(--verde-oscuro)">🌳 ${p.nombre}</h2>
+        <a href="${p.mapsUrl}" target="_blank" style="font-size:.78rem;color:var(--verde)">📍 Ver en Google Maps ↗</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <span style="font-size:.78rem;color:#888">Avance:</span>
+        <div style="flex:1;height:8px;background:#e8f0e8;border-radius:4px;overflow:hidden">
+          <div id="bar-${id}" style="width:0%;height:100%;background:linear-gradient(90deg,#56c169,#1a6e2e);border-radius:4px;transition:width .4s"></div>
+        </div>
+        <span id="pct-${id}" style="font-size:.78rem;font-weight:700;color:var(--verde-oscuro);min-width:32px">0%</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📡 Ubicación en Mapa</div>
+      <div class="map-toolbar">
+        <button class="layer-btn active" id="btn-osm-${id}" onclick="swLayer('${id}','osm')">🗺️ Calles (OSM)</button>
+        <button class="layer-btn" id="btn-sat-${id}" onclick="swLayer('${id}','sat')">🛰️ Satélite</button>
+        <button class="layer-btn" id="btn-topo-${id}" onclick="swLayer('${id}','topo')">⛰️ Topográfico</button>
+      </div>
+      <div class="map-container"><div id="map-${id}"></div></div>
+    </div>
+
+    ${infraHtml}${obsHtml}
+
+    <div class="section">
+      <div class="section-title">Seguimiento y Metas</div>
+      <div class="seguimiento-area">
+        <div class="seguimiento-field"><label>Estatus general</label>
+          <select id="seg-estatus-${id}" onchange="saveSeg('${id}')">
+            <option value="pendiente">⏳ Sin iniciar</option>
+            <option value="en-proceso">🔄 En proceso</option>
+            <option value="avanzado">📈 Avanzado</option>
+            <option value="completado">✅ Completado</option>
+          </select></div>
+        <div class="seguimiento-field"><label>Prioridad</label>
+          <select id="seg-prio-${id}" onchange="saveSeg('${id}')">
+            <option value="alta">🔴 Alta</option>
+            <option value="media" selected>🟡 Media</option>
+            <option value="baja">🟢 Baja</option>
+          </select></div>
+        <div class="seguimiento-field"><label>Responsable</label>
+          <input type="text" id="seg-resp-${id}" placeholder="Nombre del responsable" oninput="saveSeg('${id}')"></div>
+        <div class="seguimiento-field"><label>Presupuesto estimado (MXN)</label>
+          <input type="text" id="seg-pres-${id}" placeholder="Ej. $50,000" oninput="saveSeg('${id}')"></div>
+        <div class="seguimiento-field"><label>Fecha de inicio</label>
+          <input type="date" id="seg-finicio-${id}" onchange="saveSeg('${id}')"></div>
+        <div class="seguimiento-field"><label>Fecha meta</label>
+          <input type="date" id="seg-fmeta-${id}" onchange="saveSeg('${id}')"></div>
+        <div class="seguimiento-field full"><label>Notas de seguimiento</label>
+          <textarea id="seg-notas-${id}" placeholder="Describe avances, acuerdos, pendientes…" oninput="saveSeg('${id}')"></textarea></div>
+      </div>
+      <button class="btn-save" onclick="saveSeg('${id}'); showOk('ok-${id}')">💾 Guardar seguimiento</button>
+      <span class="save-ok" id="ok-${id}">✔ Guardado</span>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Bitácora de Actividades</div>
+      <ul class="log-list" id="log-${id}"></ul>
+      <div class="add-log-row">
+        <input type="text" id="loginput-${id}" placeholder="Registrar actividad realizada…"
+          onkeydown="if(event.key==='Enter')addLog('${id}')">
+        <button onclick="addLog('${id}')">+ Agregar</button>
+      </div>
+    </div>`;
 }
 
 // ================================================================
