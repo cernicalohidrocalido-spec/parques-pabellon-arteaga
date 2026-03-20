@@ -1637,29 +1637,6 @@ function buildParkPanel(p, num) {
 // ================================================================
 // INIT
 // ================================================================
-// Wrap showTab to also initialize the park map on first visit
-const _origShowTab = showTab;
-window.showTab = function(id, btn) {
-  _origShowTab(id, btn);
-  if (id !== 'general') {
-    const p = parques.find(x => x.id === id);
-    if (p) {
-      // Panel just became visible — initMap will RAF-loop until offsetWidth > 0
-      initMap(p);
-    }
-  } else {
-    // Refresh overview map when returning to General tab
-    if (window._ovMapCreated) {
-      requestAnimationFrame(() => {
-        const ovEl = document.getElementById('overview-map');
-        if (ovEl && ovEl._leaflet_id) {
-          const m = Object.values(maps_).find(x => false); // overview not in maps_
-        }
-      });
-    }
-  }
-};
-
 // ================================================================
 // FIREBASE CONFIG + PERSISTENCE
 // ================================================================
@@ -1766,17 +1743,33 @@ function restoreUI(pid) {
 }
 
 // ================================================================
-// EXPOSE GLOBALS (required for type="module" + inline onclick)
+// INIT — globals, wiring, bootstrap
 // ================================================================
-const _saveSeg         = saveSeg;
-const _updateItemEstado = updateItemEstado;
-const _saveItemMeta    = saveItemMeta;
-const _addLog          = addLog;
 
-// window.showTab is already set above with map-init wrapper — do NOT overwrite
-window.swLayer          = swLayer;
-window.filterTabs       = filterTabs;
-window.showOk           = showOk;
+// Save internal refs before wrapping
+const _saveSeg          = saveSeg;
+const _updateItemEstado = updateItemEstado;
+const _saveItemMeta     = saveItemMeta;
+const _addLog           = addLog;
+const _origShowTab      = showTab;
+
+// showTab: switch panel + init map + toggle home button
+window.showTab = function(id, btn) {
+  _origShowTab(id, btn);
+  if (id !== 'general') {
+    const p = parques.find(x => x.id === id);
+    if (p) initMap(p);
+  }
+  const homeBtn = document.getElementById('home-btn');
+  if (homeBtn) homeBtn.style.display = (id === 'general') ? 'none' : 'inline-flex';
+};
+
+// Expose map/filter globals
+window.swLayer    = swLayer;
+window.filterTabs = filterTabs;
+window.showOk     = showOk;
+
+// Expose save globals (wrapped with Firebase sync)
 window.saveSeg = function(pid) {
   _saveSeg(pid); saveToFirebase(pid);
 };
@@ -1792,44 +1785,12 @@ window.addLog = function(pid) {
   _addLog(pid); saveToFirebase(pid);
 };
 
-
-
-// ================================================================
-// INIT
-// ================================================================
-const _origShowTab = showTab;
-window.showTab = function(id, btn) {
-  _origShowTab(id, btn);
-  if (id !== 'general') {
-    const p = parques.find(x => x.id === id);
-    if (p) initMap(p);
-  }
-  const homeBtn = document.getElementById('home-btn');
-  if (homeBtn) homeBtn.style.display = (id === 'general') ? 'none' : 'inline-flex';
-};
-
-window.swLayer    = swLayer;
-window.filterTabs = filterTabs;
-window.showOk     = showOk;
-
-const _saveSeg          = saveSeg;
-const _updateItemEstado = updateItemEstado;
-const _saveItemMeta     = saveItemMeta;
-const _addLog           = addLog;
-
-window.saveSeg = function(pid) { _saveSeg(pid); saveToFirebase(pid); };
-window.updateItemEstado = function(pid, idx, sel) { _updateItemEstado(pid, idx, sel); saveToFirebase(pid); };
-window.saveItemMeta = function(pid, idx, val) {
-  _saveItemMeta(pid, idx, val);
-  clearTimeout(window._metaTimer);
-  window._metaTimer = setTimeout(() => saveToFirebase(pid), 1200);
-};
-window.addLog = function(pid) { _addLog(pid); saveToFirebase(pid); };
-
+// Wire home/general tab button
 document.getElementById('tab-general').onclick = function() {
   window.showTab('general', this);
 };
 
+// Bootstrap
 buildUI();
 loadFromFirebase();
 
