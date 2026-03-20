@@ -516,11 +516,52 @@
     #home-btn { padding: 8px 12px !important; font-size: 0.82rem !important; }
     #home-btn span.home-label { display: none; }
   }
+
+  /* ── BOTÓN INICIO FLOTANTE ── */
+  #home-btn {
+    display: none;                    /* oculto en tab General */
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 99999;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: #1a6e2e;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    align-items: center;
+    justify-content: center;
+    transition: background .2s, transform .15s;
+    /* Anclar al viewport independiente del zoom */
+    transform: translateZ(0);
+    will-change: transform;
+    -webkit-transform: translateZ(0);
+    touch-action: manipulation;
+  }
+  #home-btn:hover  { background: #2e7d32; transform: translateZ(0) scale(1.1); }
+  #home-btn:active { background: #1b5e20; transform: translateZ(0) scale(0.95); }
+
+  /* En tablet/desktop hacerlo un poco más grande */
+  @media (min-width: 768px) {
+    #home-btn { width: 60px; height: 60px; font-size: 26px; bottom: 28px; right: 28px; }
+  }
+
 </style>
 </head>
 <body>
 
 <button id="tablet-toggle" title="Info pantalla" onclick="toggleTablet()">📐</button>
+
+<!-- Botón flotante Inicio — siempre visible en esquina inferior derecha -->
+<button id="home-btn"
+  onclick="window.showTab('general', document.getElementById('tab-general'))"
+  title="🏠 Volver al Inicio">
+  🏠
+</button>
 
 
 <header>
@@ -529,15 +570,6 @@
     <h1>Sistema de Rehabilitación de Áreas Verdes</h1>
     <p>H. Ayuntamiento de Pabellón de Arteaga · Dirección de Servicios Públicos · IMBIO · 2024–2027</p>
   </div>
-  <button id="home-btn"
-    onclick="window.showTab('general', document.getElementById('tab-general'))"
-    title="Volver al inicio"
-    style="display:none;align-items:center;gap:8px;background:rgba(255,255,255,0.2);
-    color:white;border:2px solid rgba(255,255,255,0.5);border-radius:10px;
-    padding:10px 16px;font-size:0.9rem;font-weight:700;cursor:pointer;
-    white-space:nowrap;flex-shrink:0;transition:all .2s;">
-    🏠 Inicio
-  </button>
 </header>
 
 <div class="resumen-global">
@@ -594,19 +626,19 @@ import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gsta
 // ================================================================
 const TL = {
   osm:  {
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attr: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19, crossOrigin: true
+    maxZoom: 19
   },
   sat:  {
     url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
     attr: '© Google Satellite',
-    maxZoom: 20, crossOrigin: true
+    maxZoom: 20
   },
   topo: {
     url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
     attr: '© Google Terrain',
-    maxZoom: 20, crossOrigin: true
+    maxZoom: 20
   }
 };
 
@@ -1226,7 +1258,7 @@ function showTab(id, btn) {
   // Show/hide home button
   const homeBtn = document.getElementById('home-btn');
   if (homeBtn) {
-    homeBtn.style.display = (id === 'general') ? 'none' : 'inline-flex';
+    homeBtn.style.display = (id === 'general') ? 'none' : 'flex';
   }
 }
 
@@ -1368,47 +1400,47 @@ function mkIcon(label) {
 function initMap(p) {
   // Already initialized — just refresh size
   if (maps_[p.id]) {
-    maps_[p.id].map.invalidateSize();
-    setTimeout(() => maps_[p.id].map.invalidateSize(), 300);
+    setTimeout(() => maps_[p.id].map.invalidateSize(), 50);
+    setTimeout(() => maps_[p.id].map.invalidateSize(), 400);
     return;
   }
 
   const el = document.getElementById('map-' + p.id);
   if (!el) return;
 
-  // The map div has explicit inline height so Leaflet can always init.
-  // Panel display:none makes el.offsetWidth=0, so we wait for it to become visible.
+  // Wait until panel is visible (offsetWidth > 0 means display:block is applied)
+  let attempts = 0;
   function tryCreate() {
-    if (el.offsetWidth > 0) {
-      // Panel is now visible — create map
-      const map = L.map(el, {
-        zoomControl: true, scrollWheelZoom: false
-      }).setView([p.lat, p.lng], 16);
+    attempts++;
+    if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+      // Container is visible — safe to init Leaflet
+      const map = L.map(el, { zoomControl: true, scrollWheelZoom: false })
+                   .setView([p.lat, p.lng], 16);
 
       const osmL  = L.tileLayer(TL.osm.url,  { attribution: TL.osm.attr,  maxZoom: TL.osm.maxZoom  }).addTo(map);
       const satL  = L.tileLayer(TL.sat.url,  { attribution: TL.sat.attr,  maxZoom: TL.sat.maxZoom  });
       const topoL = L.tileLayer(TL.topo.url, { attribution: TL.topo.attr, maxZoom: TL.topo.maxZoom });
 
-      const idx = parques.findIndex(x => x.id === p.id) + 1;
-      L.marker([p.lat, p.lng], { icon: mkIcon(idx) }).addTo(map)
+      const markerIdx = parques.findIndex(x => x.id === p.id) + 1;
+      L.marker([p.lat, p.lng], { icon: mkIcon(markerIdx) }).addTo(map)
         .bindPopup(
-          '<strong style="color:#1a6e2e;font-size:.95rem">' + p.nombre + '</strong><br>' +
-          '<small style="color:#555">' + p.infraestructura.length + ' elementos</small><br>' +
-          '<a href="' + p.mapsUrl + '" target="_blank" style="color:#1a6e2e;font-size:.8rem">📍 Ver en Google Maps ↗</a>'
-        ).openPopup();
+          '<strong style="color:#1a6e2e">' + p.nombre + '</strong><br>' +
+          '<small>' + p.infraestructura.length + ' elementos</small><br>' +
+          '<a href="' + p.mapsUrl + '" target="_blank" style="color:#1a6e2e;font-size:.8rem">📍 Google Maps ↗</a>'
+        );
 
       maps_[p.id] = { map, layers: { osm: osmL, sat: satL, topo: topoL }, current: 'osm' };
 
-      // Force tile reload after layout settles
+      // Ensure tiles render correctly after CSS transitions
       setTimeout(() => map.invalidateSize(), 100);
-      setTimeout(() => map.invalidateSize(), 500);
-    } else {
-      // Panel still hidden — retry on next animation frame
+      setTimeout(() => map.invalidateSize(), 600);
+
+    } else if (attempts < 60) {
+      // Retry up to 60 frames (~1 second)
       requestAnimationFrame(tryCreate);
     }
   }
 
-  // Start trying on next frame (after showTab has set display:block)
   requestAnimationFrame(tryCreate);
 }
 
@@ -1426,12 +1458,11 @@ function swLayer(pid, key) {
 
 function buildOverviewMap() {
   const ovEl = document.getElementById('overview-map');
-  if (!ovEl) return;
-  // Wait for the overview map container to have real dimensions
+  if (!ovEl || window._ovMapCreated) return;
+  window._ovMapCreated = true;
+
   function _doCreateOverview() {
-    if (ovEl.offsetWidth === 0) { setTimeout(_doCreateOverview, 200); return; }
-    if (window._ovMapCreated) return;
-    window._ovMapCreated = true;
+    if (ovEl.offsetWidth === 0) { setTimeout(_doCreateOverview, 150); return; }
     const ovMap = L.map('overview-map', { scrollWheelZoom: false }).setView([22.147, -102.279], 14);
   const osmBase  = L.tileLayer(TL.osm.url,  { attribution: TL.osm.attr,  maxZoom: 19 }).addTo(ovMap);
   const satBase  = L.tileLayer(TL.sat.url,  { attribution: TL.sat.attr,  maxZoom: 19 });
@@ -1761,7 +1792,7 @@ window.showTab = function(id, btn) {
     if (p) initMap(p);
   }
   const homeBtn = document.getElementById('home-btn');
-  if (homeBtn) homeBtn.style.display = (id === 'general') ? 'none' : 'inline-flex';
+  if (homeBtn) homeBtn.style.display = (id === 'general') ? 'none' : 'flex';
 };
 
 // Expose map/filter globals
