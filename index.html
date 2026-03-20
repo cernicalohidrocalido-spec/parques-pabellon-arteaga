@@ -1250,9 +1250,7 @@ function showTab(id, btn) {
   btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   // Show/hide home button
   const homeBtn = document.getElementById('home-btn');
-  if (homeBtn) {
-    homeBtn.classList.toggle('visible', id !== 'general');
-  }
+  if (homeBtn) homeBtn.classList.add('visible');
 }
 
 function updateItemEstado(parkId, itemIdx, select) {
@@ -1793,7 +1791,7 @@ const _origShowTab      = showTab;
 window.showTab = function(id, btn) {
   _origShowTab(id, btn);
   const homeBtn = document.getElementById('home-btn');
-  if (homeBtn) homeBtn.classList.toggle('visible', id !== 'general');
+  if (homeBtn) homeBtn.classList.add('visible');
   if (id !== 'general') {
     const p = parques.find(x => x.id === id);
     if (p) {
@@ -1838,6 +1836,8 @@ document.getElementById('tab-general').onclick = function() {
 // Bootstrap
 buildUI();
 loadFromFirebase();
+// Botón home siempre visible
+document.getElementById('home-btn').classList.add('visible');
 
 </script>
 
