@@ -511,48 +511,34 @@
 }
 
 
-  /* Home button in header */
-  #home-btn:hover {
-    background: rgba(255,255,255,0.35) !important;
-    border-color: white !important;
-    transform: translateY(-1px);
-  }
-  @media (max-width: 500px) {
-    #home-btn { padding: 8px 12px !important; font-size: 0.82rem !important; }
-    #home-btn span.home-label { display: none; }
-  }
-
-  /* ── BOTÓN INICIO FLOTANTE ── */
+  /* ── BOTÓN INICIO FLOTANTE — siempre visible, inmune al zoom ── */
   #home-btn {
-    display: none;                    /* oculto en tab General */
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 99999;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    border: none;
-    background: #1a6e2e;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0,0,0,.4);
-    align-items: center;
-    justify-content: center;
-    transition: background .2s, transform .15s;
-    /* Anclar al viewport independiente del zoom */
-    transform: translateZ(0);
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    z-index: 999999 !important;
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 50% !important;
+    border: 3px solid rgba(255,255,255,0.6) !important;
+    background: #1a6e2e !important;
+    color: white !important;
+    font-size: 26px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,.5) !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    /* Capa propia del compositor — inmune al zoom del browser */
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
     will-change: transform;
-    -webkit-transform: translateZ(0);
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
-  #home-btn:hover  { background: #2e7d32; transform: translateZ(0) scale(1.1); }
-  #home-btn:active { background: #1b5e20; transform: translateZ(0) scale(0.95); }
-
-  /* En tablet/desktop hacerlo un poco más grande */
-  @media (min-width: 768px) {
-    #home-btn { width: 60px; height: 60px; font-size: 26px; bottom: 28px; right: 28px; }
+  #home-btn:active {
+    background: #2e7d32 !important;
+    transform: translateZ(0) scale(0.92) !important;
   }
 
 </style>
