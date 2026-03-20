@@ -182,7 +182,7 @@
 
 <div class="tw">
   <div class="ts" id="tabs">
-    <button class="tb active" onclick="showTab('general',this)" id="tab-general">📋 General</button>
+    <button class="tb active" id="tab-general">📋 General</button>
   </div>
 </div>
 
@@ -750,6 +750,9 @@ function filterTabs() {
 
 buildUI();
 
+// Wire the static General tab button (can't use inline onclick with type="module")
+document.getElementById('tab-general').onclick = function(){ showTab('general', this); };
+
 // Expose functions to global scope (type="module" requires this for inline onclick)
 window.showTab = showTab;
 window.swLayer = swLayer;
@@ -888,23 +891,20 @@ function restoreUI(pid) {
 }
 
 // ── Override globals to also save to Firebase ──
-window.saveSeg = function(pid) {
-  saveSeg(pid);
-  saveToFirebase(pid);
-};
-window.updItem = function(pid, idx, sel) {
-  updItem(pid, idx, sel);
-  saveToFirebase(pid);
-};
+// Save internal refs BEFORE overwriting window.* to avoid infinite loop
+const _saveSeg  = saveSeg;
+const _updItem  = updItem;
+const _saveMeta = saveMeta;
+const _addLog   = addLog;
+
+window.saveSeg = function(pid) { _saveSeg(pid); saveToFirebase(pid); };
+window.updItem = function(pid, idx, sel) { _updItem(pid, idx, sel); saveToFirebase(pid); };
 window.saveMeta = function(pid, idx, val) {
-  saveMeta(pid, idx, val);
+  _saveMeta(pid, idx, val);
   clearTimeout(window._metaTimer);
   window._metaTimer = setTimeout(() => saveToFirebase(pid), 1200);
 };
-window.addLog = function(pid) {
-  addLog(pid);
-  saveToFirebase(pid);
-};
+window.addLog = function(pid) { _addLog(pid); saveToFirebase(pid); };
 
 // ── Boot: load data after UI is built ──
 loadFromFirebase();
