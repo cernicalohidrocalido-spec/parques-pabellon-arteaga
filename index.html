@@ -526,15 +526,17 @@
     font-size: 26px !important;
     cursor: pointer !important;
     box-shadow: 0 4px 20px rgba(0,0,0,.5) !important;
-    display: none;
+    /* display controlado solo por JS — no poner aquí */
     align-items: center !important;
     justify-content: center !important;
-    /* Capa propia del compositor — inmune al zoom del browser */
     transform: translateZ(0) !important;
     -webkit-transform: translateZ(0) !important;
     will-change: transform;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+  }
+  #home-btn.visible {
+    display: flex !important;
   }
   #home-btn:active {
     background: #2e7d32 !important;
@@ -1249,7 +1251,7 @@ function showTab(id, btn) {
   // Show/hide home button
   const homeBtn = document.getElementById('home-btn');
   if (homeBtn) {
-    homeBtn.style.display = (id === 'general') ? 'none' : 'flex';
+    homeBtn.classList.toggle('visible', id !== 'general');
   }
 }
 
@@ -1791,7 +1793,7 @@ const _origShowTab      = showTab;
 window.showTab = function(id, btn) {
   _origShowTab(id, btn);
   const homeBtn = document.getElementById('home-btn');
-  if (homeBtn) homeBtn.style.display = (id === 'general') ? 'none' : 'flex';
+  if (homeBtn) homeBtn.classList.toggle('visible', id !== 'general');
   if (id !== 'general') {
     const p = parques.find(x => x.id === id);
     if (p) {
@@ -1826,6 +1828,12 @@ window.addLog = function(pid) {
 document.getElementById('tab-general').onclick = function() {
   window.showTab('general', this);
 };
+
+// Ensure home button starts hidden (on General tab at load)
+(function() {
+  const btn = document.getElementById('home-btn');
+  if (btn) btn.classList.remove('visible');
+})();
 
 // Bootstrap
 buildUI();
