@@ -25,8 +25,8 @@
   header {
     background: linear-gradient(135deg, #1b5e20 0%, #2d7a3a 60%, #388e3c 100%);
     color: white;
-    padding: 18px 28px 14px;
-    display: flex; align-items: center; gap: 18px;
+    padding: 10px 22px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: nowrap;
     box-shadow: 0 3px 12px rgba(0,0,0,0.22);
   }
   .header-escudo {
@@ -298,6 +298,19 @@
 
 /* ── MOBILE default (ya existente, no se toca) ── */
 @media (max-width: 767px) {
+  /* Ensure map containers have explicit height on mobile */
+  .map-container,
+  .map-container > div,
+  .leaflet-container {
+    height: 240px !important;
+    min-height: 240px !important;
+    width: 100% !important;
+  }
+  #overview-map,
+  #overview-map.leaflet-container {
+    height: 280px !important;
+    min-height: 280px !important;
+  }
   .app-layout { display: block; }
   .sidebar-label { display: none; }
   .tabs-scroll { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 4px; }
@@ -492,24 +505,39 @@
   #tablet-toggle { display: none; }
 }
 
+
+  /* Home button in header */
+  #home-btn:hover {
+    background: rgba(255,255,255,0.35) !important;
+    border-color: white !important;
+    transform: translateY(-1px);
+  }
+  @media (max-width: 500px) {
+    #home-btn { padding: 8px 12px !important; font-size: 0.82rem !important; }
+    #home-btn span.home-label { display: none; }
+  }
 </style>
 </head>
 <body>
 
 <button id="tablet-toggle" title="Info pantalla" onclick="toggleTablet()">📐</button>
-<button id="home-btn" title="Volver al inicio" onclick="window.showTab('general', document.getElementById('tab-general'))"
-  style="position:fixed;bottom:20px;right:20px;z-index:9000;background:#1a6e2e;color:white;
-  border:none;border-radius:50%;width:56px;height:56px;font-size:22px;cursor:pointer;
-  box-shadow:0 4px 14px rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;
-  transition:all .2s;" onmouseover="this.style.background='#2e7d32'" 
-  onmouseout="this.style.background='#1a6e2e'">🏠</button>
+
 
 <header>
   <div class="header-escudo">🌿</div>
-  <div>
+  <div style="flex:1">
     <h1>Sistema de Rehabilitación de Áreas Verdes</h1>
     <p>H. Ayuntamiento de Pabellón de Arteaga · Dirección de Servicios Públicos · IMBIO · 2024–2027</p>
   </div>
+  <button id="home-btn"
+    onclick="window.showTab('general', document.getElementById('tab-general'))"
+    title="Volver al inicio"
+    style="display:none;align-items:center;gap:8px;background:rgba(255,255,255,0.2);
+    color:white;border:2px solid rgba(255,255,255,0.5);border-radius:10px;
+    padding:10px 16px;font-size:0.9rem;font-weight:700;cursor:pointer;
+    white-space:nowrap;flex-shrink:0;transition:all .2s;">
+    🏠 Inicio
+  </button>
 </header>
 
 <div class="resumen-global">
@@ -565,12 +593,21 @@ import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gsta
 // TILE LAYERS
 // ================================================================
 const TL = {
-  osm:  { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          attr: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19 },
-  sat:  { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          attr: 'Tiles © Esri', maxZoom: 19 },
-  topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-          attr: '© OpenTopoMap', maxZoom: 17 }
+  osm:  {
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attr: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19, crossOrigin: true
+  },
+  sat:  {
+    url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+    attr: '© Google Satellite',
+    maxZoom: 20, crossOrigin: true
+  },
+  topo: {
+    url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+    attr: '© Google Terrain',
+    maxZoom: 20, crossOrigin: true
+  }
 };
 
 // ================================================================
@@ -1189,7 +1226,7 @@ function showTab(id, btn) {
   // Show/hide home button
   const homeBtn = document.getElementById('home-btn');
   if (homeBtn) {
-    homeBtn.style.display = (id === 'general') ? 'none' : 'flex';
+    homeBtn.style.display = (id === 'general') ? 'none' : 'inline-flex';
   }
 }
 
@@ -1549,7 +1586,7 @@ function buildParkPanel(p, num) {
         <button class="layer-btn" id="btn-sat-${id}" onclick="swLayer('${id}','sat')">🛰️ Satélite</button>
         <button class="layer-btn" id="btn-topo-${id}" onclick="swLayer('${id}','topo')">⛰️ Topográfico</button>
       </div>
-      <div class="map-container"><div id="map-${id}" style="width:100%;height:260px;min-height:260px;"></div></div>
+      <div class="map-container"><div id="map-${id}" style="width:100%;height:260px;min-height:240px;display:block;"></div></div>
     </div>
 
     ${infraHtml}${obsHtml}
@@ -1756,230 +1793,139 @@ window.addLog = function(pid) {
 };
 
 
-// ================================================================
-// EXPORTAR A EXCEL (SheetJS)
-// ================================================================
+</script>
 
+<script>
+// ================================================================
+// EXPORTAR A EXCEL — script global (fuera del módulo ES)
+// ================================================================
 function getFechaHoy() {
-  return new Date().toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  return new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
 }
-
-// Estado legible
 function estadoLabel(e) {
-  return { pendiente:'Sin iniciar', 'en-proceso':'En proceso', completado:'Completado', 'no-aplica':'No aplica' }[e] || e;
+  return {pendiente:'Sin iniciar','en-proceso':'En proceso',completado:'Completado','no-aplica':'No aplica'}[e]||e;
 }
 
-// ── Resumen general: una fila por parque ──
 function exportarResumenXLS() {
-  const rows = [
-    ['#', 'Parque / Área Verde', 'Estatus', 'Prioridad', 'Responsable',
-     'Presupuesto (MXN)', 'Fecha inicio', 'Fecha meta',
-     'Elementos totales', 'Completados', 'En proceso', 'Sin iniciar', 'No aplica',
-     '% Avance', 'Notas']
-  ];
-  parques.forEach((p, i) => {
-    const s = state[p.id];
-    const items = s.items;
-    const total    = items.length;
-    const comp     = items.filter(x => x.estado === 'completado').length;
-    const enProc   = items.filter(x => x.estado === 'en-proceso').length;
-    const sinInic  = items.filter(x => x.estado === 'pendiente').length;
-    const noAplica = items.filter(x => x.estado === 'no-aplica').length;
-    const aplicable = items.filter(x => x.estado !== 'no-aplica').length || 1;
-    const pct = Math.round(((comp + enProc * 0.5) / aplicable) * 100);
-    rows.push([
-      i + 1, p.nombre,
-      estadoLabel(s.estatus), s.prioridad || 'media',
-      s.responsable || '', s.presupuesto || '',
-      s.fechaInicio || '', s.fechaMeta || '',
-      total, comp, enProc, sinInic, noAplica,
-      pct + '%', s.notas || ''
-    ]);
+  if (typeof XLSX==='undefined'){alert('Librería Excel no disponible. Verifica conexión.');return;}
+  const rows=[['#','Parque / Área Verde','Estatus','Prioridad','Responsable',
+    'Presupuesto (MXN)','Fecha inicio','Fecha meta',
+    'Total elementos','Completados','En proceso','Sin iniciar','No aplica','% Avance','Notas']];
+  parques.forEach((p,i)=>{
+    const s=state[p.id], its=s.items;
+    const ap=its.filter(x=>x.estado!=='no-aplica').length||1;
+    const co=its.filter(x=>x.estado==='completado').length;
+    const en=its.filter(x=>x.estado==='en-proceso').length;
+    const si=its.filter(x=>x.estado==='pendiente').length;
+    const na=its.filter(x=>x.estado==='no-aplica').length;
+    rows.push([i+1,p.nombre,estadoLabel(s.estatus),s.prioridad||'media',
+      s.responsable||'',s.presupuesto||'',s.fechaInicio||'',s.fechaMeta||'',
+      its.length,co,en,si,na,Math.round(((co+en*.5)/ap)*100)+'%',s.notas||'']);
   });
-
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-
-  // Column widths
-  ws['!cols'] = [
-    {wch:4},{wch:36},{wch:14},{wch:10},{wch:20},
-    {wch:16},{wch:12},{wch:12},
-    {wch:8},{wch:10},{wch:10},{wch:10},{wch:10},
-    {wch:8},{wch:40}
-  ];
-  // Freeze header row
-  ws['!freeze'] = { xSplit: 0, ySplit: 1 };
-
-  XLSX.utils.book_append_sheet(wb, ws, 'Resumen General');
-  XLSX.writeFile(wb, `Resumen_Parques_${getFechaHoy().replace(/\//g,'-')}.xlsx`);
+  const wb=XLSX.utils.book_new(), ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:4},{wch:36},{wch:14},{wch:10},{wch:20},{wch:16},{wch:12},{wch:12},{wch:8},{wch:10},{wch:10},{wch:10},{wch:10},{wch:8},{wch:40}];
+  XLSX.utils.book_append_sheet(wb,ws,'Resumen General');
+  XLSX.writeFile(wb,'Resumen_Parques_'+getFechaHoy().replace(/\//g,'-')+'.xlsx');
 }
 
-// ── Todos los parques: una hoja por parque ──
 function exportarTodosXLS() {
-  const wb = XLSX.utils.book_new();
-
-  // Hoja de resumen
-  const resRows = [['#','Parque','Estatus','Prioridad','Responsable','Presupuesto','F.Inicio','F.Meta','% Avance']];
-  parques.forEach((p, i) => {
-    const s = state[p.id];
-    const items = s.items;
-    const aplicable = items.filter(x => x.estado !== 'no-aplica').length || 1;
-    const comp = items.filter(x => x.estado === 'completado').length;
-    const enProc = items.filter(x => x.estado === 'en-proceso').length;
-    const pct = Math.round(((comp + enProc * 0.5) / aplicable) * 100);
-    resRows.push([i+1, p.nombre, estadoLabel(s.estatus), s.prioridad||'media',
-      s.responsable||'', s.presupuesto||'', s.fechaInicio||'', s.fechaMeta||'', pct+'%']);
+  if (typeof XLSX==='undefined'){alert('Librería Excel no disponible. Verifica conexión.');return;}
+  const wb=XLSX.utils.book_new();
+  const rr=[['#','Parque','Estatus','Prioridad','Responsable','Presupuesto','F.Inicio','F.Meta','% Avance']];
+  parques.forEach((p,i)=>{
+    const s=state[p.id];
+    const ap=s.items.filter(x=>x.estado!=='no-aplica').length||1;
+    const co=s.items.filter(x=>x.estado==='completado').length;
+    const en=s.items.filter(x=>x.estado==='en-proceso').length;
+    rr.push([i+1,p.nombre,estadoLabel(s.estatus),s.prioridad||'media',
+      s.responsable||'',s.presupuesto||'',s.fechaInicio||'',s.fechaMeta||'',
+      Math.round(((co+en*.5)/ap)*100)+'%']);
   });
-  const wsRes = XLSX.utils.aoa_to_sheet(resRows);
-  wsRes['!cols'] = [{wch:4},{wch:36},{wch:14},{wch:10},{wch:20},{wch:16},{wch:12},{wch:12},{wch:8}];
-  XLSX.utils.book_append_sheet(wb, wsRes, 'Resumen');
-
-  // Una hoja por parque
-  parques.forEach(p => {
-    const s = state[p.id];
-    const rows = [];
-
-    // Encabezado del parque
-    rows.push(['PARQUE:', p.nombre]);
-    rows.push(['Estatus:', estadoLabel(s.estatus), 'Prioridad:', s.prioridad||'media']);
-    rows.push(['Responsable:', s.responsable||'', 'Presupuesto:', s.presupuesto||'']);
-    rows.push(['Fecha inicio:', s.fechaInicio||'', 'Fecha meta:', s.fechaMeta||'']);
-    rows.push(['Notas:', s.notas||'']);
+  const wsR=XLSX.utils.aoa_to_sheet(rr);
+  wsR['!cols']=[{wch:4},{wch:36},{wch:14},{wch:10},{wch:20},{wch:16},{wch:12},{wch:12},{wch:8}];
+  XLSX.utils.book_append_sheet(wb,wsR,'Resumen');
+  parques.forEach(p=>{
+    const s=state[p.id], rows=[];
+    rows.push(['PARQUE:',p.nombre]);
+    rows.push(['Estatus:',estadoLabel(s.estatus),'Prioridad:',s.prioridad||'media']);
+    rows.push(['Responsable:',s.responsable||'','Presupuesto:',s.presupuesto||'']);
+    rows.push(['F.inicio:',s.fechaInicio||'','F.meta:',s.fechaMeta||'']);
+    rows.push(['Notas:',s.notas||'']);
     rows.push([]);
-
-    // Infraestructura
-    if (p.infraestructura.length > 0) {
-      rows.push(['#','Elemento','Indicador','Estado','Meta / Cantidad','Observación']);
-      p.infraestructura.forEach((it, i) => {
-        const item = s.items[i] || {};
-        rows.push([
-          i + 1, it.item, it.indicador || '—',
-          estadoLabel(item.estado || 'pendiente'),
-          item.meta || it.meta || '',
-          it.obs || ''
-        ]);
+    if(p.infraestructura.length>0){
+      rows.push(['#','Elemento','Indicador','Estado','Meta','Observación']);
+      p.infraestructura.forEach((it,i)=>{
+        const item=s.items[i]||{};
+        rows.push([i+1,it.item,it.indicador||'—',estadoLabel(item.estado||'pendiente'),item.meta||it.meta||'',it.obs||'']);
       });
       rows.push([]);
     }
-
-    // Observaciones del diagnóstico
-    if (p.observaciones && p.observaciones.length > 0) {
-      rows.push(['OBSERVACIONES DEL DIAGNÓSTICO:']);
-      p.observaciones.forEach((o, i) => rows.push([i + 1, o]));
+    if(p.observaciones&&p.observaciones.length>0){
+      rows.push(['OBSERVACIONES:']);
+      p.observaciones.forEach((o,i)=>rows.push([i+1,o]));
       rows.push([]);
     }
-
-    // Bitácora
-    if (s.log && s.log.length > 0) {
-      rows.push(['BITÁCORA DE ACTIVIDADES:']);
-      rows.push(['Fecha', 'Actividad']);
-      s.log.forEach(e => rows.push([e.date, e.text]));
+    if(s.log&&s.log.length>0){
+      rows.push(['BITÁCORA:']);
+      rows.push(['Fecha','Actividad']);
+      s.log.forEach(e=>rows.push([e.date,e.text]));
     }
-
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    ws['!cols'] = [{wch:4},{wch:32},{wch:28},{wch:14},{wch:16},{wch:30}];
-
-    // Sheet name max 31 chars, no special chars
-    const sheetName = p.nombre.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]/g,'').substring(0, 28);
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:4},{wch:32},{wch:28},{wch:14},{wch:16},{wch:30}];
+    XLSX.utils.book_append_sheet(wb,ws,p.nombre.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9 ]/g,'').substring(0,28));
   });
-
-  XLSX.writeFile(wb, `Parques_Pabellon_Arteaga_${getFechaHoy().replace(/\//g,'-')}.xlsx`);
+  XLSX.writeFile(wb,'Parques_Pabellon_'+getFechaHoy().replace(/\//g,'-')+'.xlsx');
 }
 
-// ── Exportar ficha individual de un parque ──
 function exportarParqueXLS(pid) {
-  const p = parques.find(x => x.id === pid);
-  if (!p) return;
-  const s = state[pid];
-  const wb = XLSX.utils.book_new();
-  const rows = [];
-
+  if (typeof XLSX==='undefined'){alert('Librería Excel no disponible. Verifica conexión.');return;}
+  const p=parques.find(x=>x.id===pid); if(!p) return;
+  const s=state[pid], wb=XLSX.utils.book_new(), rows=[];
   rows.push(['SISTEMA DE REHABILITACIÓN DE ÁREAS VERDES']);
   rows.push(['H. Ayuntamiento de Pabellón de Arteaga · IMBIO · 2024–2027']);
   rows.push([]);
-  rows.push(['PARQUE:', p.nombre]);
-  rows.push(['Google Maps:', p.mapsUrl]);
+  rows.push(['PARQUE:',p.nombre]);
+  rows.push(['Google Maps:',p.mapsUrl]);
   rows.push([]);
-  rows.push(['Estatus general:', estadoLabel(s.estatus)]);
-  rows.push(['Prioridad:', s.prioridad || 'media']);
-  rows.push(['Responsable:', s.responsable || '']);
-  rows.push(['Presupuesto estimado (MXN):', s.presupuesto || '']);
-  rows.push(['Fecha de inicio:', s.fechaInicio || '']);
-  rows.push(['Fecha meta:', s.fechaMeta || '']);
-  rows.push(['Notas:', s.notas || '']);
+  rows.push(['Estatus:',estadoLabel(s.estatus),'Prioridad:',s.prioridad||'media']);
+  rows.push(['Responsable:',s.responsable||'','Presupuesto (MXN):',s.presupuesto||'']);
+  rows.push(['Fecha inicio:',s.fechaInicio||'','Fecha meta:',s.fechaMeta||'']);
+  rows.push(['Notas:',s.notas||'']);
   rows.push([]);
-
-  // Infraestructura
-  if (p.infraestructura.length > 0) {
-    rows.push(['FICHA DE NECESIDADES — INFRAESTRUCTURA Y EQUIPO']);
-    rows.push(['#', 'Elemento', 'Indicador', 'Estado', 'Meta / Cantidad', 'Observación']);
-    p.infraestructura.forEach((it, i) => {
-      const item = s.items[i] || {};
-      rows.push([
-        i + 1, it.item, it.indicador || '—',
-        estadoLabel(item.estado || 'pendiente'),
-        item.meta || it.meta || '',
-        it.obs || ''
-      ]);
+  if(p.infraestructura.length>0){
+    rows.push(['FICHA DE NECESIDADES — INFRAESTRUCTURA']);
+    rows.push(['#','Elemento','Indicador','Estado','Meta / Cantidad','Observación']);
+    p.infraestructura.forEach((it,i)=>{
+      const item=s.items[i]||{};
+      rows.push([i+1,it.item,it.indicador||'—',estadoLabel(item.estado||'pendiente'),item.meta||it.meta||'',it.obs||'']);
     });
     rows.push([]);
   }
-
-  // Avance
-  const items = s.items;
-  const aplicable = items.filter(x => x.estado !== 'no-aplica').length || 1;
-  const comp = items.filter(x => x.estado === 'completado').length;
-  const enProc = items.filter(x => x.estado === 'en-proceso').length;
-  const sinInic = items.filter(x => x.estado === 'pendiente').length;
-  const noAp = items.filter(x => x.estado === 'no-aplica').length;
-  const pct = Math.round(((comp + enProc * 0.5) / aplicable) * 100);
+  const ap=s.items.filter(x=>x.estado!=='no-aplica').length||1;
+  const co=s.items.filter(x=>x.estado==='completado').length;
+  const en=s.items.filter(x=>x.estado==='en-proceso').length;
+  const si=s.items.filter(x=>x.estado==='pendiente').length;
+  const na=s.items.filter(x=>x.estado==='no-aplica').length;
   rows.push(['RESUMEN DE AVANCE']);
-  rows.push(['Completados:', comp, 'En proceso:', enProc, 'Sin iniciar:', sinInic, 'No aplica:', noAp]);
-  rows.push(['% Avance:', pct + '%']);
+  rows.push(['Completados:',co,'En proceso:',en,'Sin iniciar:',si,'No aplica:',na]);
+  rows.push(['% Avance:',Math.round(((co+en*.5)/ap)*100)+'%']);
   rows.push([]);
-
-  // Observaciones diagnóstico
-  if (p.observaciones && p.observaciones.length > 0) {
+  if(p.observaciones&&p.observaciones.length>0){
     rows.push(['OBSERVACIONES DEL DIAGNÓSTICO']);
-    p.observaciones.forEach((o, i) => rows.push([i + 1, o]));
+    p.observaciones.forEach((o,i)=>rows.push([i+1,o]));
     rows.push([]);
   }
-
-  // Bitácora
-  if (s.log && s.log.length > 0) {
+  if(s.log&&s.log.length>0){
     rows.push(['BITÁCORA DE ACTIVIDADES']);
-    rows.push(['Fecha', 'Actividad registrada']);
-    s.log.forEach(e => rows.push([e.date, e.text]));
+    rows.push(['Fecha','Actividad registrada']);
+    s.log.forEach(e=>rows.push([e.date,e.text]));
     rows.push([]);
   }
-
-  rows.push(['Generado:', new Date().toLocaleString('es-MX')]);
-
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch:28},{wch:34},{wch:28},{wch:14},{wch:16},{wch:30}];
-  const sheetName = p.nombre.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]/g,'').substring(0, 28);
-  XLSX.utils.book_append_sheet(wb, ws, sheetName);
-
-  const fileName = p.nombre.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]/g,'_').replace(/ +/g,'_');
-  XLSX.writeFile(wb, `Ficha_${fileName}_${getFechaHoy().replace(/\//g,'-')}.xlsx`);
+  rows.push(['Generado:',new Date().toLocaleString('es-MX')]);
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:28},{wch:34},{wch:28},{wch:14},{wch:16},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,ws,p.nombre.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9 ]/g,'').substring(0,28));
+  XLSX.writeFile(wb,'Ficha_'+p.nombre.replace(/[^a-zA-Z0-9 ]/g,'_').replace(/ +/g,'_').substring(0,30)+'_'+getFechaHoy().replace(/\//g,'-')+'.xlsx');
 }
-
-// Detect screen size and show info
-function toggleTablet() {
-  const w = window.innerWidth;
-  const mode = w < 768 ? 'Móvil' : w < 1200 ? 'Tablet' : 'Escritorio';
-  const btn = document.getElementById('tablet-toggle');
-  btn.title = 'Pantalla: ' + w + 'px (' + mode + ')';
-  // Refresh all maps
-  setTimeout(() => { Object.values(maps_).forEach(m => m.map.invalidateSize()); }, 300);
-}
-
-
-document.getElementById('tab-general').onclick = function() { window.showTab('general', this); };
-
-buildUI();
-loadFromFirebase();
-
 </script>
 </body></html>
