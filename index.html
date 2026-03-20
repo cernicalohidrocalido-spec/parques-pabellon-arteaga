@@ -1414,7 +1414,9 @@ function initMap(p) {
   if (!el) return;
 
   function doCreate() {
-    void el.offsetWidth; // force reflow so Leaflet reads real dimensions
+    void el.offsetWidth; // force reflow
+
+    // Log dimensions for debugging
 
     const osmL  = L.tileLayer(TL.osm.url,  { attribution: TL.osm.attr,  maxZoom: TL.osm.maxZoom });
     const satL  = L.tileLayer(TL.sat.url,  { attribution: TL.sat.attr,  maxZoom: TL.sat.maxZoom });
@@ -1541,7 +1543,7 @@ function buildUI() {
                : nombre.includes('cosmos') || nombre.includes('lineal') || nombre.includes('progreso') ? 'fa-tree'
                : 'fa-leaf';
     btn.innerHTML = '<span><i class="fa-solid ' + icon + ' fa-fw" style="margin-right:6px;opacity:.8"></i>' + p.nombre + '</span><span class="badge">' + p.infraestructura.length + '</span>';
-    btn.onclick = () => showTab(p.id, btn);
+    btn.onclick = () => window.showTab(p.id, btn);
     tabsScroll.appendChild(btn);
 
     // Overview card
@@ -1555,7 +1557,7 @@ function buildUI() {
       '<small style="color:#888;font-size:0.73rem">' + p.infraestructura.length + ' elementos · ' +
       '<a href="' + p.mapsUrl + '" target="_blank" style="color:var(--verde)">Ver en mapa ↗</a></small>';
     ov.style.cursor = 'pointer';
-    ov.onclick = () => showTab(p.id, document.getElementById('tab-' + p.id));
+    ov.onclick = () => window.showTab(p.id, document.getElementById('tab-' + p.id));
     overviewGrid.appendChild(ov);
 
     // Panel
