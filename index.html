@@ -298,7 +298,9 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 // ================================================================
 // TILE LAYERS
@@ -1266,9 +1268,140 @@ window.showTab = function(id, btn) {
   }
 };
 
+// ================================================================
+// FIREBASE CONFIG + PERSISTENCE
+// ================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCJHWkgE8WikDOR22xtdmDxTq6h1migvRY",
+  authDomain: "parques-pabellon.firebaseapp.com",
+  projectId: "parques-pabellon",
+  storageBucket: "parques-pabellon.firebasestorage.app",
+  messagingSenderId: "833734169897",
+  appId: "1:833734169897:web:585da3002572935a029338"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db    = getFirestore(fbApp);
+
+// Sync indicator
+const syncEl = document.createElement('div');
+syncEl.style.cssText = `position:fixed;bottom:16px;right:16px;background:#1a6e2e;color:#fff;
+  padding:7px 14px;border-radius:20px;font-size:.74rem;font-weight:600;
+  box-shadow:0 2px 10px rgba(0,0,0,.25);display:none;z-index:9999;transition:opacity .3s`;
+document.body.appendChild(syncEl);
+function showSync(msg, color='#1a6e2e') {
+  syncEl.textContent = msg; syncEl.style.background = color;
+  syncEl.style.display = 'block'; syncEl.style.opacity = '1';
+}
+function hideSync() {
+  syncEl.style.opacity = '0';
+  setTimeout(() => { syncEl.style.display = 'none'; }, 400);
+}
+
+async function saveToFirebase(pid) {
+  try {
+    showSync('☁️ Guardando…');
+    const s = state[pid];
+    await setDoc(doc(db, 'parques', pid), {
+      estatus: s.estatus, prioridad: s.prioridad,
+      responsable: s.responsable, fechaInicio: s.fechaInicio,
+      fechaMeta: s.fechaMeta, presupuesto: s.presupuesto,
+      notas: s.notas, log: s.log, items: s.items,
+      updatedAt: new Date().toISOString()
+    });
+    showSync('✅ Guardado', '#1a6e2e');
+    setTimeout(hideSync, 2000);
+  } catch(e) {
+    showSync('❌ Error al guardar', '#c0392b');
+    setTimeout(hideSync, 3000);
+    console.error('Firebase save error:', e);
+  }
+}
+
+async function loadFromFirebase() {
+  try {
+    showSync('☁️ Cargando avances…');
+    const snap = await getDocs(collection(db, 'parques'));
+    snap.forEach(docSnap => {
+      const pid = docSnap.id;
+      const data = docSnap.data();
+      if (!state[pid]) return;
+      Object.assign(state[pid], {
+        estatus:     data.estatus     || 'pendiente',
+        prioridad:   data.prioridad   || 'media',
+        responsable: data.responsable || '',
+        fechaInicio: data.fechaInicio || '',
+        fechaMeta:   data.fechaMeta   || '',
+        presupuesto: data.presupuesto || '',
+        notas:       data.notas       || '',
+        log:         data.log         || [],
+        items:       data.items       || state[pid].items,
+      });
+    });
+    parques.forEach(p => {
+      restoreUI(p.id);
+      updateParkProgress(p.id);
+      renderLog(p.id);
+    });
+    updateStats();
+    showSync('✅ Avances cargados', '#1565c0');
+    setTimeout(hideSync, 2000);
+  } catch(e) {
+    showSync('⚠️ Sin conexión — modo local', '#e8a200');
+    setTimeout(hideSync, 3000);
+    console.warn('Firebase load error:', e);
+  }
+}
+
+function restoreUI(pid) {
+  const s = state[pid];
+  const g = id => document.getElementById(id);
+  if (g('seg-estatus-' + pid)) g('seg-estatus-' + pid).value = s.estatus;
+  if (g('seg-prio-'    + pid)) g('seg-prio-'    + pid).value = s.prioridad;
+  if (g('seg-resp-'    + pid)) g('seg-resp-'    + pid).value = s.responsable;
+  if (g('seg-pres-'    + pid)) g('seg-pres-'    + pid).value = s.presupuesto;
+  if (g('seg-finicio-' + pid)) g('seg-finicio-' + pid).value = s.fechaInicio;
+  if (g('seg-fmeta-'   + pid)) g('seg-fmeta-'   + pid).value = s.fechaMeta;
+  if (g('seg-notas-'   + pid)) g('seg-notas-'   + pid).value = s.notas;
+  s.items.forEach((item, i) => {
+    const sel = g('item-estado-' + pid + '-' + i);
+    const met = g('item-meta-'   + pid + '-' + i);
+    if (sel) { sel.value = item.estado; sel.className = 'estado-select estado-' + item.estado; }
+    if (met) met.value = item.meta || '';
+  });
+}
+
+// ================================================================
+// EXPOSE GLOBALS (required for type="module" + inline onclick)
+// ================================================================
+const _saveSeg         = saveSeg;
+const _updateItemEstado = updateItemEstado;
+const _saveItemMeta    = saveItemMeta;
+const _addLog          = addLog;
+
+window.showTab          = showTab;
+window.swLayer          = swLayer;
+window.filterTabs       = filterTabs;
+window.showOk           = showOk;
+window.saveSeg = function(pid) {
+  _saveSeg(pid); saveToFirebase(pid);
+};
+window.updateItemEstado = function(pid, idx, sel) {
+  _updateItemEstado(pid, idx, sel); saveToFirebase(pid);
+};
+window.saveItemMeta = function(pid, idx, val) {
+  _saveItemMeta(pid, idx, val);
+  clearTimeout(window._metaTimer);
+  window._metaTimer = setTimeout(() => saveToFirebase(pid), 1200);
+};
+window.addLog = function(pid) {
+  _addLog(pid); saveToFirebase(pid);
+};
+
+
 document.getElementById('tab-general').onclick = function() { window.showTab('general', this); };
 
 buildUI();
+loadFromFirebase();
 
 </script>
 </body></html>
