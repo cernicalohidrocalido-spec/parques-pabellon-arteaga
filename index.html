@@ -508,31 +508,7 @@
   .seguimiento-area { grid-template-columns: repeat(3, 1fr) !important; }
 
   #tablet-toggle { display: none; }
-}
-
-
-  /* home-btn — SIEMPRE visible, flotante */
-  #home-btn {
-    display: block !important;
-    position: fixed !important;
-    bottom: 18px !important;
-    right: 18px !important;
-    z-index: 2147483647 !important;
-    width: 58px !important;
-    height: 58px !important;
-    border-radius: 50% !important;
-    border: 3px solid rgba(255,255,255,0.8) !important;
-    background: #1a6e2e !important;
-    color: white !important;
-    font-size: 28px !important;
-    line-height: 58px !important;
-    text-align: center !important;
-    cursor: pointer !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,.6) !important;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
-  #home-btn:active { background: #2e7d32 !important; }0,0,.4);
+}0,0,.4);
   }eZ(0) scale(0.92) !important;
   }
 
@@ -1821,39 +1797,95 @@ loadFromFirebase();
 // BOTÓN HOME FLOTANTE — posicionado y mantenido por JS
 // ================================================================
 (function() {
-  function posicionarHome() {
-    var btn = document.getElementById('home-btn');
+  // Crear botón home desde JS y adjuntarlo al body
+  // Esto evita cualquier interferencia de Leaflet, transforms o z-index de otros elementos
+  function crearBtnHome() {
+    var btn = document.createElement('button');
+    btn.id = 'home-btn-flotante';
+    btn.textContent = '🏠';
+    btn.title = 'Volver al Inicio';
+
+    // Estilos 100% inline — nada puede sobreescribirlos
+    var s = btn.style;
+    s.cssText = [
+      'position:fixed',
+      'bottom:18px',
+      'right:18px',
+      'width:60px',
+      'height:60px',
+      'border-radius:50%',
+      'border:3px solid rgba(255,255,255,0.85)',
+      'background:#1a6e2e',
+      'color:white',
+      'font-size:28px',
+      'line-height:60px',
+      'text-align:center',
+      'cursor:pointer',
+      'box-shadow:0 4px 20px rgba(0,0,0,0.6)',
+      'z-index:2147483647',
+      'touch-action:manipulation',
+      '-webkit-tap-highlight-color:transparent',
+      'outline:none',
+      'padding:0',
+      'margin:0',
+      'display:block',
+      'top:auto',
+      'left:auto',
+      'transform:none',
+      'visibility:visible',
+      'opacity:1',
+      'pointer-events:auto'
+    ].join(';');
+
+    btn.addEventListener('click', function() {
+      if (window.showTab) {
+        window.showTab('general', document.getElementById('tab-general'));
+      }
+    });
+
+    btn.addEventListener('touchstart', function() {
+      btn.style.background = '#2e7d32';
+    }, {passive:true});
+    btn.addEventListener('touchend', function() {
+      btn.style.background = '#1a6e2e';
+    }, {passive:true});
+
+    document.body.appendChild(btn);
+    return btn;
+  }
+
+  function forzarPosicion(btn) {
     if (!btn) return;
-    // Posición fija desde la esquina inferior derecha de la VENTANA
-    var margen = 18;
-    btn.style.position  = 'fixed';
-    btn.style.bottom    = margen + 'px';
-    btn.style.right     = margen + 'px';
-    btn.style.top       = 'auto';
-    btn.style.left      = 'auto';
-    btn.style.zIndex    = '2147483647';
+    // Forzar estilos críticos en cada llamada
+    btn.style.position   = 'fixed';
+    btn.style.bottom     = '18px';
+    btn.style.right      = '18px';
+    btn.style.top        = 'auto';
+    btn.style.left       = 'auto';
+    btn.style.zIndex     = '2147483647';
+    btn.style.display    = 'block';
+    btn.style.visibility = 'visible';
+    btn.style.opacity    = '1';
+    btn.style.transform  = 'none';
   }
 
-  function mostrarHome() {
-    posicionarHome();
+  var btn;
+  function init() {
+    btn = crearBtnHome();
+    // Forzar posición cada 300ms — sobrevive a cualquier zoom, scroll o cambio de layout
+    setInterval(function() { forzarPosicion(btn); }, 300);
+    window.addEventListener('scroll', function() { forzarPosicion(btn); }, {passive:true});
+    window.addEventListener('resize', function() { forzarPosicion(btn); }, {passive:true});
+    window.addEventListener('orientationchange', function() {
+      setTimeout(function() { forzarPosicion(btn); }, 400);
+    });
   }
 
-  // Posicionar al cargar
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mostrarHome);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    mostrarHome();
+    init();
   }
-
-  // Reposicionar al hacer scroll, resize y orientación
-  window.addEventListener('scroll',      posicionarHome, { passive: true });
-  window.addEventListener('resize',      posicionarHome, { passive: true });
-  window.addEventListener('orientationchange', function() {
-    setTimeout(posicionarHome, 300);
-  });
-
-  // Reposicionar cada 500ms como seguro extra (por zoom en móvil)
-  setInterval(posicionarHome, 500);
 })();
 
 // ================================================================
@@ -1988,7 +2020,5 @@ function exportarParqueXLS(pid) {
   XLSX.writeFile(wb,'Ficha_'+p.nombre.replace(/[^a-zA-Z0-9 ]/g,'_').replace(/ +/g,'_').substring(0,30)+'_'+getFechaHoy().replace(/\//g,'-')+'.xlsx');
 }
 </script>
-<button id="home-btn"
-  onclick="window.showTab('general', document.getElementById('tab-general'))"
-  title="Volver al Inicio">🏠</button>
+
 </body></html>
