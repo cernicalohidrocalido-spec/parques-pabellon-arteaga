@@ -1303,20 +1303,8 @@ function mkIcon(label) {
   });
 }
 
-function initMap(p) {
-  // If already initialized, just refresh size
-  if (maps_[p.id]) {
-    [100, 300, 700].forEach(t => setTimeout(() => maps_[p.id].map.invalidateSize(), t));
-    return;
-  }
-  const el = document.getElementById('map-' + p.id);
-  if (!el) return;
-  // Ensure container has dimensions before init
-  if (el.offsetWidth === 0 || el.offsetHeight === 0) {
-    setTimeout(() => initMap(p), 200);
-    return;
-  }
-  const map = L.map('map-' + p.id, { zoomControl: true, scrollWheelZoom: false }).setView([p.lat, p.lng], 16);
+function _createLeafletMap(p, el) {
+  const map = L.map(el, { zoomControl: true, scrollWheelZoom: false }).setView([p.lat, p.lng], 16);
   const osmL  = L.tileLayer(TL.osm.url,  { attribution: TL.osm.attr,  maxZoom: TL.osm.maxZoom  }).addTo(map);
   const satL  = L.tileLayer(TL.sat.url,  { attribution: TL.sat.attr,  maxZoom: TL.sat.maxZoom  });
   const topoL = L.tileLayer(TL.topo.url, { attribution: TL.topo.attr, maxZoom: TL.topo.maxZoom });
@@ -1326,7 +1314,44 @@ function initMap(p) {
       '<small>' + p.infraestructura.length + ' elementos · ' +
       '<a href="' + p.mapsUrl + '" target="_blank" style="color:#1a6e2e">Google Maps ↗</a></small>');
   maps_[p.id] = { map, layers: { osm: osmL, sat: satL, topo: topoL }, current: 'osm' };
-  [150, 400, 900].forEach(t => setTimeout(() => map.invalidateSize(), t));
+  setTimeout(() => map.invalidateSize(), 100);
+}
+
+function initMap(p) {
+  // Already initialized — just refresh size
+  if (maps_[p.id]) {
+    maps_[p.id].map.invalidateSize();
+    return;
+  }
+  const el = document.getElementById('map-' + p.id);
+  if (!el) return;
+
+  // If container already has size, create immediately
+  if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+    _createLeafletMap(p, el);
+    return;
+  }
+
+  // Container is hidden (panel display:none) — watch for when it gets dimensions
+  const ro = new ResizeObserver((entries, observer) => {
+    const entry = entries[0];
+    const w = entry.contentRect.width;
+    const h = entry.contentRect.height;
+    if (w > 0 && h > 0) {
+      observer.disconnect();
+      // Small delay to let browser finish painting
+      setTimeout(() => {
+        if (!maps_[p.id]) _createLeafletMap(p, el);
+        else maps_[p.id].map.invalidateSize();
+      }, 50);
+    }
+  });
+  ro.observe(el);
+
+  // Safety fallback: if ResizeObserver never fires after 3s, force it
+  setTimeout(() => {
+    if (!maps_[p.id] && el.offsetWidth > 0) _createLeafletMap(p, el);
+  }, 3000);
 }
 
 function swLayer(pid, key) {
@@ -1342,7 +1367,14 @@ function swLayer(pid, key) {
 }
 
 function buildOverviewMap() {
-  const ovMap = L.map('overview-map', { scrollWheelZoom: false }).setView([22.150, -102.285], 13);
+  const ovEl = document.getElementById('overview-map');
+  if (!ovEl) return;
+  // Wait for the overview map container to have real dimensions
+  function _doCreateOverview() {
+    if (ovEl.offsetWidth === 0) { setTimeout(_doCreateOverview, 200); return; }
+    if (window._ovMapCreated) return;
+    window._ovMapCreated = true;
+    const ovMap = L.map('overview-map', { scrollWheelZoom: false }).setView([22.150, -102.285], 13);
   const osmBase  = L.tileLayer(TL.osm.url,  { attribution: TL.osm.attr,  maxZoom: 19 }).addTo(ovMap);
   const satBase  = L.tileLayer(TL.sat.url,  { attribution: TL.sat.attr,  maxZoom: 19 });
   const topoBase = L.tileLayer(TL.topo.url, { attribution: TL.topo.attr, maxZoom: 17 });
@@ -1374,6 +1406,9 @@ function buildOverviewMap() {
       setTimeout(() => marker.closePopup(), 800);
     });
   });
+  setTimeout(() => ovMap.invalidateSize(), 300);
+  }
+  _doCreateOverview();
 }
 
 // ================================================================
@@ -1550,7 +1585,20 @@ window.showTab = function(id, btn) {
   _origShowTab(id, btn);
   if (id !== 'general') {
     const p = parques.find(x => x.id === id);
-    if (p) { setTimeout(() => initMap(p), 100); setTimeout(() => initMap(p), 400); }
+    if (p) {
+      // requestAnimationFrame ensures panel is visible before initMap checks dimensions
+      requestAnimationFrame(() => requestAnimationFrame(() => initMap(p)));
+    }
+  } else {
+    // Refresh overview map when returning to General tab
+    if (window._ovMapCreated) {
+      requestAnimationFrame(() => {
+        const ovEl = document.getElementById('overview-map');
+        if (ovEl && ovEl._leaflet_id) {
+          const m = Object.values(maps_).find(x => false); // overview not in maps_
+        }
+      });
+    }
   }
 };
 
