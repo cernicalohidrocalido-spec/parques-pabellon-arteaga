@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rehabilitación de Áreas Verdes — Pabellón de Arteaga 2024-2027</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+  :root {
+    --verde:#1a6e2e;--verde2:#2d8c45;--verde-claro:#e6f4ea;--verde-mid:#4caf50;
+    --am:#e8a200;--ro:#c0392b;--az:#1565c0;
+    --bg:#eef2ee;--gris:#f1f5f1;--borde:#d4e0d5;--osc:#4a5e4d;--blanco:#fff;
+    --s1:0 2px 10px rgba(0,0,0,.09);--s2:0 4px 20px rgba(0,0,0,.13);
+    --r:10px;--font:'IBM Plex Sans','Segoe UI',sans-serif;--mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:#1c2e1c;font-size:14px}
+  /* HEADER */
+  header{background:linear-gradient(135deg,#0f4020,#1a6e2e 55%,#2d8c45);color:#fff;
+    padding:14px 22px;display:flex;align-items:center;gap:14px;
+    box-shadow:0 3px 14px rgba(0,0,0,.28);position:sticky;top:0;z-index:2000}
+  .hi{font-size:28px;flex-shrink:0}
+  header h1{font-size:1.02rem;font-weight:700;line-height:1.3}
+  header p{font-size:.72rem;opacity:.8;margin-top:2px;font-family:var(--mono)}
+  /* STATS */
+  .stats{background:#fff;margin:14px 16px 0;border-radius:var(--r);padding:11px 16px;
+    box-shadow:var(--s1);display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+  .stats h2{font-size:.70rem;color:var(--osc);flex-basis:100%;text-transform:uppercase;
+    letter-spacing:.07em;font-family:var(--mono)}
+  .sp{flex:1;min-width:90px;background:var(--gris);border-radius:8px;padding:7px 10px;
+    text-align:center;border:1.5px solid var(--borde)}
+  .sp .n{font-size:1.5rem;font-weight:700;color:var(--verde);font-family:var(--mono)}
+  .sp .l{font-size:.66rem;color:var(--osc);text-transform:uppercase;letter-spacing:.04em}
+  .sp.am .n{color:var(--am)}.sp.az .n{color:var(--az)}.sp.ro .n{color:var(--ro)}
+  /* SEARCH */
+  .srch{margin:10px 16px 0}
+  .srch input{width:100%;padding:8px 13px;border-radius:8px;border:1.5px solid var(--borde);
+    font-size:.86rem;font-family:var(--font);outline:none;background:#fff;transition:border-color .2s}
+  .srch input:focus{border-color:var(--verde);box-shadow:0 0 0 3px rgba(26,110,46,.1)}
+  /* TABS */
+  .tw{margin:10px 16px 0}
+  .ts{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}
+  .ts::-webkit-scrollbar{height:3px}.ts::-webkit-scrollbar-thumb{background:#b2d4b8;border-radius:3px}
+  .tb{flex-shrink:0;padding:6px 12px;border:1.5px solid var(--borde);background:#fff;
+    border-radius:8px 8px 0 0;cursor:pointer;font-size:.74rem;font-weight:600;
+    color:var(--osc);border-bottom-color:transparent;transition:all .15s;
+    white-space:nowrap;font-family:var(--font)}
+  .tb:hover{background:var(--verde-claro);color:var(--verde);border-color:var(--verde);border-bottom-color:transparent}
+  .tb.active{background:var(--verde);color:#fff;border-color:var(--verde)}
+  .tb .bdg{display:inline-block;padding:0 5px;border-radius:8px;font-size:.63rem;margin-left:3px;
+    background:rgba(255,255,255,.22);color:inherit}
+  .tb:not(.active) .bdg{background:var(--verde-claro);color:var(--verde)}
+  /* PANELS */
+  .pw{margin:0 16px 26px}
+  .pn{display:none}.pn.active{display:block}
+  /* PARK CARD */
+  .pc{background:#fff;border-radius:0 var(--r) var(--r) var(--r);box-shadow:var(--s2);overflow:hidden}
+  .ph{background:linear-gradient(135deg,#0f4020,#2d8c45);color:#fff;padding:14px 18px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .ph h2{font-size:1.02rem;font-weight:700;line-height:1.3}
+  .ph a{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.18);
+    color:#fff;text-decoration:none;padding:4px 10px;border-radius:20px;font-size:.72rem;
+    font-weight:600;transition:background .18s;white-space:nowrap;flex-shrink:0;
+    border:1px solid rgba(255,255,255,.3)}
+  .ph a:hover{background:rgba(255,255,255,.32)}
+  /* PROGRESS */
+  .pbr{padding:9px 18px;background:#f4fbf5;border-bottom:1px solid #dce8dc;
+    display:flex;align-items:center;gap:11px}
+  .pbr span{font-size:.73rem;color:var(--osc);white-space:nowrap;font-family:var(--mono)}
+  .pbo{flex:1;height:8px;background:#d4e8d4;border-radius:6px;overflow:hidden}
+  .pbi{height:100%;background:linear-gradient(90deg,#56c169,#1a6e2e);border-radius:6px;transition:width .5s}
+  .ppct{font-size:.78rem;font-weight:700;color:var(--verde);min-width:34px;text-align:right;font-family:var(--mono)}
+  /* MAP SECTION */
+  .ms{border-bottom:1px solid #e4ede4}
+  .mt{display:flex;align-items:center;gap:7px;padding:9px 18px 7px;
+    background:#f7fbf7;border-bottom:1px solid #e4ede4;flex-wrap:wrap}
+  .mt span{font-size:.70rem;font-weight:700;color:var(--osc);text-transform:uppercase;
+    letter-spacing:.05em;margin-right:3px;font-family:var(--mono)}
+  .lb{padding:3px 11px;border-radius:16px;border:1.5px solid var(--borde);background:#fff;
+    font-size:.72rem;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--osc);transition:all .15s}
+  .lb:hover{border-color:var(--verde);color:var(--verde)}
+  .lb.active{background:var(--verde);color:#fff;border-color:var(--verde)}
+  .mc{height:260px;position:relative}
+  .mc>div{height:100%;width:100%}
+  /* SECTION */
+  .sec{padding:13px 18px;border-bottom:1px solid #edf2ed}
+  .st{font-size:.70rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--osc);margin-bottom:9px;display:flex;align-items:center;gap:7px;font-family:var(--mono)}
+  .st::before{content:'';display:block;width:3px;height:13px;background:var(--verde);border-radius:3px}
+  /* TABLE */
+  .nt{width:100%;border-collapse:collapse;font-size:.79rem}
+  .nt th{background:var(--verde-claro);color:var(--verde);font-weight:700;padding:5px 8px;
+    text-align:left;border-bottom:2px solid #c0dfc4;font-family:var(--mono);font-size:.69rem;
+    text-transform:uppercase;letter-spacing:.04em}
+  .nt td{padding:5px 8px;border-bottom:1px solid #f0f4f0;vertical-align:middle}
+  .nt tr:last-child td{border-bottom:none}
+  .nt tr:hover td{background:#f7fdf7}
+  .oc{color:#888;font-style:italic;font-size:.72rem}
+  /* SELECT */
+  .es{padding:3px 6px;border:1.5px solid var(--borde);border-radius:6px;
+    font-size:.72rem;background:#fff;cursor:pointer;outline:none;font-family:var(--font)}
+  .es:focus{border-color:var(--verde)}
+  .ep{background:#fff8e1;border-color:#ffe082}
+  .ee{background:#e3f2fd;border-color:#90caf9}
+  .ec{background:#e8f5e9;border-color:#a5d6a7}
+  .mi{width:60px;padding:3px 5px;border:1.5px solid var(--borde);border-radius:6px;
+    font-size:.74rem;text-align:center;outline:none;font-family:var(--mono)}
+  .mi:focus{border-color:var(--verde)}
+  /* OBS */
+  .ol{list-style:none}
+  .ol li{padding:5px 0 5px 16px;font-size:.80rem;color:#3a4e3a;
+    border-bottom:1px dashed #e8ede8;position:relative}
+  .ol li:last-child{border-bottom:none}
+  .ol li::before{content:'▸';position:absolute;left:0;color:var(--verde2);font-size:.70rem;top:7px}
+  /* SEGUIMIENTO */
+  .sg{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  @media(max-width:560px){.sg{grid-template-columns:1fr}}
+  .sf label{display:block;font-size:.66rem;font-weight:700;color:var(--osc);margin-bottom:3px;
+    text-transform:uppercase;letter-spacing:.05em;font-family:var(--mono)}
+  .sf input,.sf textarea,.sf select{width:100%;padding:5px 8px;border:1.5px solid var(--borde);
+    border-radius:7px;font-size:.80rem;outline:none;font-family:var(--font);transition:border-color .2s}
+  .sf input:focus,.sf textarea:focus,.sf select:focus{border-color:var(--verde)}
+  .sf textarea{resize:vertical;min-height:60px}
+  .sf.full{grid-column:1/-1}
+  .bts{margin-top:9px;padding:6px 16px;background:var(--verde);color:#fff;border:none;
+    border-radius:7px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:var(--font);transition:background .15s}
+  .bts:hover{background:#0f4020}
+  .sok{display:none;color:var(--verde);font-size:.74rem;margin-left:7px;font-weight:700;font-family:var(--mono)}
+  /* LOG */
+  .ll{list-style:none;max-height:150px;overflow-y:auto}
+  .ll li{padding:4px 0;font-size:.76rem;color:#4a5e4d;border-bottom:1px solid #f0f4f0;display:flex;gap:7px}
+  .ll li .ld{color:#aaa;white-space:nowrap;font-family:var(--mono);font-size:.68rem}
+  .alr{display:flex;gap:6px;margin-top:7px}
+  .alr input{flex:1;padding:5px 8px;border:1.5px solid var(--borde);border-radius:7px;
+    font-size:.78rem;outline:none;font-family:var(--font)}
+  .alr input:focus{border-color:var(--verde)}
+  .alr button{padding:5px 11px;background:var(--verde);color:#fff;border:none;border-radius:7px;
+    cursor:pointer;font-size:.78rem;font-family:var(--font);font-weight:600}
+  /* OVERVIEW */
+  #panel-general .og{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:11px}
+  .oc2{background:#fff;border-radius:var(--r);padding:11px 13px;box-shadow:var(--s1);
+    cursor:pointer;border:1.5px solid var(--borde);transition:border-color .18s,transform .18s}
+  .oc2:hover{border-color:var(--verde);transform:translateY(-2px)}
+  .oc2 h3{font-size:.82rem;font-weight:700;color:var(--verde);margin-bottom:4px}
+  .oe{display:inline-block;font-size:.68rem;padding:2px 7px;border-radius:10px;
+    font-weight:700;margin-bottom:4px;font-family:var(--mono)}
+  .osi{background:#fff3e0;color:#e65100}.opr{background:#e3f2fd;color:#0d47a1}
+  .oav{background:#f3e5f5;color:#6a1b9a}.oco{background:#e8f5e9;color:#1b5e20}
+  .mb{height:5px;background:#e0eae0;border-radius:4px;overflow:hidden}
+  .mbi{height:100%;background:linear-gradient(90deg,#56c169,#1a6e2e);border-radius:4px;transition:width .4s}
+  #overview-map{height:340px;border-radius:var(--r);overflow:hidden;box-shadow:var(--s2);margin-bottom:14px}
+  @media(max-width:640px){
+    .stats,.srch,.tw,.pw{margin-left:8px;margin-right:8px}
+    .sec,.mt{padding-left:13px;padding-right:13px}
+    .ph{flex-direction:column}.mc{height:210px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hi">🌿</div>
+  <div>
+    <h1>Sistema de Rehabilitación de Áreas Verdes</h1>
+    <p>H. Ayuntamiento de Pabellón de Arteaga · Servicios Públicos · IMBIO · 2024–2027</p>
+  </div>
+</header>
+
+<div class="stats">
+  <h2>📊 Resumen General</h2>
+  <div class="sp"><div class="n" id="st-tot">27</div><div class="l">Áreas verdes</div></div>
+  <div class="sp ro"><div class="n" id="st-p">—</div><div class="l">Sin iniciar</div></div>
+  <div class="sp am"><div class="n" id="st-e">—</div><div class="l">En proceso</div></div>
+  <div class="sp az"><div class="n" id="st-c">—</div><div class="l">Completadas</div></div>
+  <div class="sp"><div class="n" id="st-pct">—</div><div class="l">% Avance</div></div>
+</div>
+
+<div class="srch">
+  <input type="text" id="srch-in" placeholder="🔍 Buscar área verde por nombre…" oninput="filterTabs()">
+</div>
+
+<div class="tw">
+  <div class="ts" id="tabs">
+    <button class="tb active" onclick="showTab('general',this)" id="tab-general">📋 General</button>
+  </div>
+</div>
+
+<div class="pw">
+  <div class="pn active" id="panel-general">
+    <div style="background:#fff;border-radius:0 var(--r) var(--r) var(--r);padding:16px 18px;box-shadow:var(--s2)">
+      <p style="color:var(--osc);font-size:.82rem;margin-bottom:13px">Vista general. Haz clic en una tarjeta o pestaña para ver la ficha completa con mapa interactivo.</p>
+      <div id="overview-map"></div>
+      <div class="og" id="ov-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+// ── TILE LAYERS ──
+const TL = {
+  osm:{ url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom:19 },
+  sat:{ url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr:'Tiles © Esri — Esri, USGS, NOAA', maxZoom:19 },
+  topo:{ url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr:'© OpenTopoMap contributors', maxZoom:17 }
+};
+
+// ── PARQUES DATA ──
+const parques = [
+  { id:"p1", nombre:"Parque Francisco Villa", lat:22.1510, lng:-102.2780,
+    mapsUrl:"https://maps.app.goo.gl/NKPtdV7cqy6nAc4AA",
+    infra:[
+      {n:"Bebederos de agua",i:"Colocación"},{n:"Resbaladillas",i:"Pintar",m:"1"},
+      {n:"Cestos de basura",i:"Pintar por tipo de residuo"},{n:"Senderos",i:"Reforestar"},
+      {n:"Pasto",i:"Plantar"},{n:"Árboles",i:"—",o:"Aprox 40"},{n:"Acera perimetral",i:"Pintar"},
+      {n:"Velaría",i:"Mantenimiento y limpieza"},{n:"Skate",i:"Pintar"},
+      {n:"Rampas discapacitados",i:"—",o:"Solo 2"},{n:"Puertas de acceso",i:"—",o:"Solo 2"}
+    ],
+    obs:["Instalar red hidráulica y arreglar bomba de cisterna","Plantas ornamentales","Mantenimiento en general","Cestos de basura conforme a norma","Instalar arbotantes","Baños en completo abandono","Instalar nomenclatura del espacio"]
+  },
+  { id:"p2", nombre:"Escuadra Insurgentes y Niños Héroes", lat:22.1525, lng:-102.2755,
+    mapsUrl:"https://maps.app.goo.gl/DpRYHetmNtUj8wCu8",
+    infra:[{n:"Cestos de basura",i:"Instalar"},{n:"Luminarias",i:"Colocar"},{n:"Árboles",i:"—",o:"Aprox 20"}],
+    obs:["Proyecto integral de rehabilitación con vecinos e IMBIO","Adquisición de plantas de ornato","Reubicar contenedor de basura que genera mala estética"]
+  },
+  { id:"p3", nombre:"Escuadra Insurgentes y Manuel M. Ponce", lat:22.1535, lng:-102.2770,
+    mapsUrl:"https://maps.app.goo.gl/hFEXBLgH9vXKfGK3A",
+    infra:[{n:"Cestos de basura",i:"Instalar"},{n:"Luminarias",i:"Colocar"},{n:"Árboles",i:"—",o:"Aprox 20"}],
+    obs:["Proyecto integral de rehabilitación con vecinos e IMBIO","Adquisición de plantas de ornato","Reubicar contenedor de basura","Checar con obras públicas ventanas a espacio público","Revisar permiso de carpintería"]
+  },
+  { id:"p4", nombre:"Parque La Escuadra / La Lengua", lat:22.1495, lng:-102.2795,
+    mapsUrl:"https://maps.app.goo.gl/zGSKDuWqFTapuvaS6",
+    infra:[
+      {n:"Cerco perimetral",i:"Pintar"},{n:"Bancas",i:"Cambiar"},{n:"Bebederos de agua",i:"Colocar"},
+      {n:"Resbaladillas",i:"Pintar"},{n:"Máquinas de ejercicio",i:"Colocar"},{n:"Cestos de basura",i:"Colocar"},
+      {n:"Senderos",i:"Reforestar"},{n:"Llaves de agua potable",i:"Colocar"},{n:"Pasto",i:"Plantar"},
+      {n:"Árboles",i:"—",o:"Aprox 40"},{n:"Puerta de acceso",i:"Colocar"},{n:"Acera perimetral",i:"Pintar"}
+    ],
+    obs:["Instalar red hidráulica (ampliación)","Bancas: sustituir","Plantas ornamentales","Mantenimiento en general","Cestos pintados conforme a norma","Registros de luz sin tapadera","Rehabilitación del módulo (personas en situación de calle)","Referencia de nombre del lugar"]
+  },
+  { id:"p5", nombre:"Jardín Juárez", lat:22.1548, lng:-102.2742,
+    mapsUrl:"https://maps.app.goo.gl/DbbjctwpeKaxqFe1A",
+    infra:[
+      {n:"Bancas",i:"Pintar"},{n:"Bebederos",i:"Colocar"},{n:"Máquinas de ejercicio",i:"Mantenimiento"},
+      {n:"Cancha de futbol",i:"Adecuar"},{n:"Baños",i:"Acondicionar"},{n:"Cestos de basura",i:"Mantenimiento"},
+      {n:"Luminarias",i:"Cambiar"},{n:"Vigilancia",i:"Colocar"},{n:"Llaves de agua potable",i:"Colocar"},
+      {n:"Pasto",i:"Plantar"},{n:"Árboles",i:"—",o:"Aprox 70"},{n:"Rampas discapacitados",i:"Pintar"},
+      {n:"Velaría",i:"Colocar"}
+    ],
+    obs:["Instalar red hidráulica","Bancas","Plantas ornamentales","Llaves de agua","Mantenimiento en general","Cestos conforme a norma","Velaría: techado y arco de estructura","Más arbotantes de iluminación"]
+  },
+  { id:"p6", nombre:"Parte Trasera de Chaneques", lat:22.1470, lng:-102.2810,
+    mapsUrl:"https://maps.app.goo.gl/YWyH36wNpDE1oVp88",
+    infra:[
+      {n:"Cerco perimetral",i:"Colocar"},{n:"Bancas",i:"Rehabilitar"},{n:"Columpios",i:"Colocar"},
+      {n:"Máquinas de ejercicio",i:"Mantenimiento"},{n:"Baños",i:"Colocar"},{n:"Cestos de basura",i:"Mantenimiento"},
+      {n:"Luminarias",i:"Reubicar / Mantenimiento"},{n:"Vigilancia",i:"Colocar"},
+      {n:"Llaves de agua potable",i:"Colocar"},{n:"Pasto",i:"Plantar"},
+      {n:"Árboles",i:"Plantar",o:"Aprox 70, se requieren más"},{n:"Velaría",i:"Mantenimiento / Limpieza"}
+    ],
+    obs:["Retirar arbotantes de luz","Adquisición de plantas de ornato","Nomenclatura panorámica"]
+  },
+  { id:"p7", nombre:"Costado del Centro de Salud", lat:22.1555, lng:-102.2760,
+    mapsUrl:"https://maps.app.goo.gl/8eqvAKF91NAxFWCa7",
+    infra:[{n:"Árboles",i:"—",o:"20 entre arbustos y árboles"},{n:"Llave de agua tratada",i:"Colocar"},{n:"Luminarias",i:"Colocar"}],
+    obs:["Modificar alumbrado (dos arbotantes más)","Colocar llave de agua para mantenimiento","Plantas ornamentales","Darle buena vista con jardines"]
+  },
+  { id:"p8", nombre:"Los Chaneques", lat:22.1462, lng:-102.2820,
+    mapsUrl:"https://maps.app.goo.gl/pdGQFjLFq7YwrLSP6_",
+    infra:[
+      {n:"Cancha de futbol",i:"Colocar"},{n:"Cancha de voleibol",i:"Adecuar área"},
+      {n:"Cestos de basura",i:"Colocar"},{n:"Luminarias",i:"Instalar"},{n:"Senderos",i:"Mantenimiento"},
+      {n:"Árboles",i:"—",o:"Aprox 100"},{n:"Puertas de acceso",i:"Colocar"},{n:"Velaría",i:"Limpiar"},
+      {n:"Bancas",i:"Instalar"},{n:"Llave de agua tratada",i:"Colocar"}
+    ],
+    obs:["Instalar red hidráulica","Mantenimiento general (eléctrico, hidráulico)","Proyecto de plantación de árboles","Delimitación de área de estacionamiento","Nombre del parque panorámico"]
+  },
+  { id:"p9", nombre:"Jardín de la Amistad (Fracc. Popular)", lat:22.1503, lng:-102.2840,
+    mapsUrl:"https://maps.app.goo.gl/rzqiCUA7MC4jF47U6",
+    infra:[
+      {n:"Bancas",i:"Pintar"},{n:"Columpios",i:"Colocar"},{n:"Máquinas de ejercicio",i:"Pintar"},
+      {n:"Luminarias",i:"Reparar"},{n:"Senderos",i:"Pintar"},{n:"Llaves de agua potable",i:"Instalar"},
+      {n:"Pasto",i:"Plantar"},{n:"Árboles",i:"—",o:"Aprox 30"},{n:"Rampas discapacitados",i:"Colocar"},
+      {n:"Puertas de acceso",i:"Habilitar"},{n:"Acera perimetral",i:"Pintar"},{n:"Velaría",i:"Limpiar"}
+    ],
+    obs:["Instalar red hidráulica","Plantas ornamentales","Mantenimiento en general","Cestos conforme a norma","Rehabilitación del módulo","Reubicar llave del módulo (CAPAPA)","Nomenclatura visible del lugar"]
+  },
+  { id:"p10", nombre:"Parque Cosmos 3", lat:22.1480, lng:-102.2862,
+    mapsUrl:"https://maps.app.goo.gl/RDCbLaMXdzxBs1Rm8",
+    infra:[
+      {n:"Juegos infantiles",i:"Reparar"},{n:"Resbaladillas",i:"Pintar"},{n:"Máquinas de ejercicio",i:"Colocar"},
+      {n:"Cestos de basura",i:"Reparar"},{n:"Senderos",i:"Reforestar"},{n:"Llaves de agua potable",i:"Colocar"},
+      {n:"Árboles",i:"—",o:"Aprox 30"},{n:"Acera perimetral",i:"Colocar"},{n:"Bancas",i:"Pintar"}
+    ],
+    obs:["Plantas ornamentales","Mantenimiento en general","Cestos conforme a norma","Juego tipo jaula con riesgo de accidente","Demasiados hormigueros","Cambiar arena y grava","Nomenclatura panorámica"]
+  },
+  { id:"p11", nombre:"Cosmos 2", lat:22.1490, lng:-102.2875,
+    mapsUrl:"https://maps.app.goo.gl/KUK1QHCW7YyTdc2R6",
+    infra:[
+      {n:"Bancas",i:"Reparar / Pintar"},{n:"Columpios",i:"Reparar"},{n:"Cestos de basura",i:"Reparar"},
+      {n:"Senderos",i:"Reforestar"},{n:"Llave de agua potable",i:"Reparar"},{n:"Pasto",i:"Plantar"},
+      {n:"Árboles",i:"—",o:"Aprox 40"},{n:"Acera perimetral",i:"Pintar"},{n:"Velaría",i:"Limpiar"},
+      {n:"Juegos infantiles",i:"Reparar"},{n:"Máquinas de ejercicio",i:"Mantenimiento"}
+    ],
+    obs:["Rehabilitación de aljibe (instalación de bombeo)","Mantenimiento en general","Cestos conforme a norma","Limpieza de caimanes","Sube y bajas quebrados","Mantenimiento de aparatos de ejercicio"]
+  },
+  { id:"p12", nombre:"Parque Lineal", lat:22.1515, lng:-102.2888,
+    mapsUrl:"https://maps.app.goo.gl/VKpdLb3QefN9Doy59",
+    infra:[],
+    obs:["Rehabilitación integral de pintura de herrería","Colocar y pintar conforme a norma","Vigilancia","Mantenimiento integral permanente"]
+  },
+  { id:"p13", nombre:"Parque Progreso Sur", lat:22.1456, lng:-102.2755,
+    mapsUrl:"https://maps.app.goo.gl/HcoZq3G6FGAvUMiW7",
+    infra:[
+      {n:"Cestos de basura",i:"Pintar"},{n:"Arenero",i:"Mantenimiento"},{n:"Senderos",i:"Pintar"},
+      {n:"Bancas",i:"Mantenimiento"},{n:"Llaves de agua potable",i:"Colocar"},{n:"Pasto",i:"Plantar"},
+      {n:"Árboles",i:"—",o:"Aprox 60 entre árboles y arbustos"},{n:"Rampas discapacitados",i:"Colocar"},
+      {n:"Aparatos para ejercicio",i:"Reparar"}
+    ],
+    obs:["Mantenimiento cancha de básquetbol","Reparar aparatos para ejercicio","Pintura guarnición"]
+  },
+  { id:"p14", nombre:"Parque Skateboard", lat:22.1560, lng:-102.2730,
+    mapsUrl:"https://maps.app.goo.gl/iTWqYqWjWP72vN9h9",
+    infra:[],
+    obs:["Modificar alumbrado (dos arbotantes más)","Colocar llave de agua para mantenimiento","Plantas ornamentales","Pintar todas las estructuras","Colocar cestos de basura"]
+  },
+  { id:"p15", nombre:"Jardín Progreso / Parque de la Plutarco", lat:22.1445, lng:-102.2800,
+    mapsUrl:"https://maps.app.goo.gl/sZi3k29HzXnxnHMJ9",
+    infra:[
+      {n:"Cerco perimetral",i:"Pintar"},{n:"Bancas",i:"Pintar / Reparar"},{n:"Columpios",i:"Colocar"},
+      {n:"Cestos de basura",i:"Colocar"},{n:"Senderos",i:"Limpiar caimanes"},{n:"Llaves de agua potable",i:"Colocar"},
+      {n:"Pasto",i:"Plantar"},{n:"Rampas discapacitados",i:"Colocar"},{n:"Puertas de acceso",i:"Reparar"},
+      {n:"Velaría",i:"Limpieza / Mantenimiento"}
+    ],
+    obs:["Quitar 8 arbotantes para reubicación","Checar iluminación","Checar aljibe","Coordinar con CAPAPA limpieza del pozo","Parque muy sucio, basura y completamente seco","Nomenclatura panorámica","Señalética de prohibiciones"]
+  },
+  { id:"p16", nombre:"Velaría de Vergel", lat:22.1430, lng:-102.2910,
+    mapsUrl:"https://maps.app.goo.gl/8fiFbhaA9EPRJCZEA",
+    infra:[
+      {n:"Bancas",i:"Colocar"},{n:"Cancha de voleibol",i:"Adecuar"},
+      {n:"Baños",i:"—",o:"Solo de uso del personal"},{n:"Cestos de basura",i:"Colocar / Pintar"},
+      {n:"Vigilancia",i:"—",o:"Solo en los turnos"},{n:"Llaves de agua potable",i:"Colocar"},
+      {n:"Pasto",i:"Plantar"},{n:"Árboles",i:"—",o:"Aprox 50"},{n:"Rampas discapacitados",i:"Colocar"},
+      {n:"Puertas de acceso",i:"Colocar"},{n:"Acera perimetral",i:"Pintar"},{n:"Velaría",i:"Limpiar"}
+    ],
+    obs:["Plantas ornamentales","Mantenimiento en general","Cestos conforme a norma","Activar oficinas bajo escaleras; cambiar pintura de módulos","Letreros de prohibición (heces de perro)","Nomenclatura panorámica"]
+  },
+  { id:"p17", nombre:"Canchas de Vergel", lat:22.1420, lng:-102.2922,
+    mapsUrl:"https://maps.app.goo.gl/4EkcoDB5g61tbfgG7",
+    infra:[
+      {n:"Cerca perimetral",i:"Colocar"},{n:"Bancas",i:"Pintar",o:"Colocar en jardines aledaños"},
+      {n:"Juegos infantiles",i:"Reparar / Pintar"},{n:"Baños",i:"Mantenimiento"},
+      {n:"Arenero",i:"—",o:"Cambiar arenas"},{n:"Llaves de agua potable",i:"Colocar"},
+      {n:"Pasto",i:"—",o:"Sintético"}
+    ],
+    obs:["Instalar red hidráulica","Bancas","Plantas ornamentales","Mantenimiento permanente","Cestos conforme a norma","Colocación de arbotantes","Letreros de prohibiciones (heces de perros)","4 jardines aledaños atendidos por vecinos: poda, bancas, red hidráulica"]
+  },
+  { id:"p18", nombre:"Jardín de Villas de Guadalupe", lat:22.1408, lng:-102.2960,
+    mapsUrl:"https://maps.app.goo.gl/wH2tCYqpWScnNwJEA",
+    infra:[
+      {n:"Bancas",i:"Colocar"},{n:"Pasto",i:"Plantar"},{n:"Árboles",i:"—"},
+      {n:"Senderos",i:"Colocar"},{n:"Cestos de basura",i:"Colocar / Pintar"},
+      {n:"Rampas discapacitados",i:"Colocar / Pintar"},{n:"Alumbrado",i:"Colocar"}
+    ],
+    obs:["Instalar red hidráulica para riego","Mantenimiento integral en general","Palapa requiere mantenimiento integral","Vecino con cochera sin permiso en parque","Nomenclatura panorámica","Señalética de restricciones"]
+  },
+  { id:"p19", nombre:"Áreas a Rehabilitar de Vergeles", lat:22.1415, lng:-102.2940,
+    mapsUrl:"https://maps.app.goo.gl/cTtPufzxG12na9oYA",
+    infra:[],
+    obs:["Rehabilitación integral"]
+  },
+  { id:"p20", nombre:"Parque Bosques", lat:22.1400, lng:-102.2980,
+    mapsUrl:"https://maps.app.goo.gl/FKwhWQrFY9EjyMzX9",
+    infra:[
+      {n:"Bancas",i:"Colocar"},{n:"Pasto",i:"Plantar"},{n:"Árboles",i:"Plantar",o:"Plantas de ornamento"},
+      {n:"Cestos de basura",i:"Colocar / Pintar"}
+    ],
+    obs:["Instalación de red hidráulica (ampliación)","Mantenimiento en general","Área cuidada por vecinos del fraccionamiento","Nomenclatura panorámica","Restricciones","Limpieza y deshierbe del rebombeo","Checar comodato del área"]
+  },
+  { id:"p21", nombre:"Escuadra Valle del Vivero", lat:22.1570, lng:-102.2900,
+    mapsUrl:"https://maps.app.goo.gl/3LBeiAv5oBPHZrTq8",
+    infra:[
+      {n:"Bancas",i:"Colocar"},{n:"Cestos de basura",i:"Colocar"},{n:"Sendero",i:"Reforestar"},
+      {n:"Llaves de agua potable",i:"Colocar"},{n:"Pasto",i:"Plantar"},
+      {n:"Árboles",i:"Podar",o:"Aprox 20; poda formativa"},{n:"Acera perimetral",i:"Limpiar / Pintar"},
+      {n:"Juegos infantiles",i:"Colocar"},{n:"Luminaria",i:"Colocar"}
+    ],
+    obs:["Instalar red hidráulica","Plantas ornamentales"]
+  },
+  { id:"p22", nombre:"Parque Valle del Vivero 2", lat:22.1580, lng:-102.2915,
+    mapsUrl:"https://maps.app.goo.gl/RSoVaFP7L4pFStaf8",
+    infra:[
+      {n:"Cerco perimetral",i:"Pintar"},{n:"Bancas",i:"Cambiar / cambiar concreto"},
+      {n:"Bebederos de agua",i:"Colocación"},{n:"Juegos infantiles",i:"Pintar",o:"Resbaladillas: colocar"},
+      {n:"Máquinas de ejercicio",i:"Colocar"},{n:"Cestos de basura",i:"Colocar"},
+      {n:"Senderos",i:"Reforestar / Limpiar"},{n:"Llaves de agua potable",i:"Colocar"},
+      {n:"Pasto",i:"Plantar"},{n:"Árboles",i:"—",o:"Aprox 20"},{n:"Acera perimetral",i:"Pintar"},
+      {n:"Luminaria",i:"Colocar"},{n:"Vigilancia",i:"Colocar"}
+    ],
+    obs:["Instalar red hidráulica","Plantas ornamentales","Mantenimiento en general","Posibilidad de un foro","Nomenclatura del lugar panorámica","Señalamientos de prohibiciones"]
+  },
+  { id:"p23", nombre:"Fraccionamiento FOVISSSTE", lat:22.1395, lng:-102.3000,
+    mapsUrl:"https://maps.app.goo.gl/JmWKdJCwZAgFf9kXA",
+    infra:[
+      {n:"Luminaria",i:"Colocar"},{n:"Velaría",i:"Pintar",o:"Mantenimiento estructura metálica"},
+      {n:"Llave de agua tratada",i:"Colocar"}
+    ],
+    obs:["Remplazar malla sombra del área de aparatos de ejercicio"]
+  },
+  { id:"p24", nombre:"Glorieta La Vendimia", lat:22.1565, lng:-102.2715,
+    mapsUrl:"https://maps.app.goo.gl/GRigtUJ58aJsAAkJ7",
+    infra:[
+      {n:"Cerco perimetral",i:"Reparar"},{n:"Luminarias",i:"Colocar"},
+      {n:"Árboles",i:"Remover",o:"Remover árboles secos"}
+    ],
+    obs:["Mantenimiento de 'la viñadora'"]
+  },
+  { id:"p25", nombre:"Plaza del Migrante (Norte)", lat:22.1542, lng:-102.2750,
+    mapsUrl:"https://maps.app.goo.gl/E6gTtLKy4cvXZAiR8",
+    infra:[
+      {n:"Cerco perimetral",i:"Reparar"},{n:"Bancas",i:"Colocar"},{n:"Luminarias",i:"Colocar"},
+      {n:"Senderos",i:"Deshierbar"},{n:"Vigilancia",i:"Colocar"},{n:"Árboles",i:"Plantar",o:"Plantas de ornamento"}
+    ],
+    obs:["Pintura","Rehabilitación de jardineras","Checar permisos de comerciantes"]
+  },
+  { id:"p26", nombre:"Plaza del Migrante (Sur)", lat:22.1538, lng:-102.2758,
+    mapsUrl:"https://maps.app.goo.gl/YdFR7XhfGxJ2rxTV9",
+    infra:[
+      {n:"Cerco perimetral",i:"Reparar"},{n:"Bancas",i:"Colocar"},{n:"Luminarias",i:"Colocar"},
+      {n:"Senderos",i:"Deshierbar"},{n:"Árboles",i:"Plantar",o:"Plantas de ornamento"},{n:"Vigilancia",i:"Colocar"}
+    ],
+    obs:["Pintura","Rehabilitación de jardineras","Red hidráulica","Colocación de herrería"]
+  },
+  { id:"p27", nombre:"Plaza La Concordia", lat:22.1530, lng:-102.2772,
+    mapsUrl:"https://maps.app.goo.gl/BywpvpNQJ7XTrP259",
+    infra:[
+      {n:"Bancas",i:"Colocar"},{n:"Cestos de basura",i:"Colocar"},{n:"Senderos",i:"Construir"},
+      {n:"Árboles",i:"Plantar",o:"Árboles de ornamento"},{n:"Luminaria",i:"Colocar"}
+    ],
+    obs:["Arreglar bolardos (luz y mantenimiento)","Iluminación nueva","Nomenclatura","Diseños de jardinería","Construir un andador o sendero"]
+  }
+];
+
+// ── STATE ──
+const state = {};
+parques.forEach(p => {
+  state[p.id] = {
+    estatus:'pendiente', prioridad:'media', responsable:'',
+    fechaInicio:'', fechaMeta:'', presupuesto:'', notas:'', log:[],
+    items: p.infra.map(() => ({estado:'pendiente', meta:''}))
+  };
+});
+
+const maps_ = {}; // leaflet instances
+
+// ── BUILD UI ──
+function buildUI() {
+  const tabsEl = document.getElementById('tabs');
+  const pwEl = document.querySelector('.pw');
+  const ovEl = document.getElementById('ov-grid');
+
+  parques.forEach(p => {
+    // Tab
+    const btn = document.createElement('button');
+    btn.className = 'tb';
+    btn.id = 'tab-' + p.id;
+    btn.setAttribute('data-name', p.nombre.toLowerCase());
+    btn.innerHTML = p.nombre + ' <span class="bdg">' + p.infra.length + '</span>';
+    btn.onclick = () => showTab(p.id, btn);
+    tabsEl.appendChild(btn);
+
+    // Overview card
+    const ov = document.createElement('div');
+    ov.className = 'oc2';
+    ov.id = 'ov-' + p.id;
+    ov.innerHTML = '<h3>' + p.nombre + '</h3>' +
+      '<span class="oe osi" id="ovest-' + p.id + '">Sin iniciar</span>' +
+      '<div class="mb"><div class="mbi" id="ovbar-' + p.id + '" style="width:0%"></div></div>' +
+      '<small style="color:#888;font-size:.68rem;margin-top:4px;display:block">' + p.infra.length + ' elementos · ' +
+      '<a href="' + p.mapsUrl + '" target="_blank" style="color:var(--verde)">Google Maps ↗</a></small>';
+    ov.onclick = () => showTab(p.id, document.getElementById('tab-' + p.id));
+    ovEl.appendChild(ov);
+
+    // Panel
+    const pn = document.createElement('div');
+    pn.className = 'pn';
+    pn.id = 'panel-' + p.id;
+    pn.innerHTML = buildParkHTML(p);
+    pwEl.appendChild(pn);
+  });
+
+  updateStats();
+  buildOverviewMap();
+}
+
+function buildParkHTML(p) {
+  let infraHTML = '';
+  if (p.infra.length > 0) {
+    infraHTML = '<div class="sec"><div class="st">Ficha de Necesidades — Infraestructura y Equipo</div>' +
+      '<table class="nt"><thead><tr><th>#</th><th>Elemento</th><th>Indicador</th><th>Estado</th><th>Meta / Cant.</th><th>Observación</th></tr></thead><tbody>' +
+      p.infra.map((it,i) =>
+        '<tr><td style="color:#aaa;font-family:var(--mono)">' + (i+1) + '</td>' +
+        '<td><strong>' + it.n + '</strong></td>' +
+        '<td>' + (it.i||'—') + '</td>' +
+        '<td><select class="es ep" id="itsel-' + p.id + '-' + i + '" onchange="updItem(\'' + p.id + '\',' + i + ',this)">' +
+          '<option value="pendiente">⏳ Pendiente</option>' +
+          '<option value="en-proceso">🔄 En proceso</option>' +
+          '<option value="completado">✅ Completado</option>' +
+        '</select></td>' +
+        '<td><input class="mi" type="text" id="itmeta-' + p.id + '-' + i + '" placeholder="' + (it.m||'—') + '" oninput="saveMeta(\'' + p.id + '\',' + i + ',this.value)"></td>' +
+        '<td class="oc">' + (it.o||'') + '</td></tr>'
+      ).join('') +
+      '</tbody></table></div>';
+  }
+
+  let obsHTML = '';
+  if (p.obs.length > 0) {
+    obsHTML = '<div class="sec"><div class="st">Observaciones y Comentarios del Diagnóstico</div>' +
+      '<ul class="ol">' + p.obs.map(o => '<li>' + o + '</li>').join('') + '</ul></div>';
+  }
+
+  return '<div class="pc">' +
+    '<div class="ph"><h2>🌳 ' + p.nombre + '</h2><a href="' + p.mapsUrl + '" target="_blank">📍 Ver en Google Maps</a></div>' +
+    '<div class="pbr"><span>Avance:</span><div class="pbo"><div class="pbi" id="bar-' + p.id + '" style="width:0%"></div></div><span class="ppct" id="pct-' + p.id + '">0%</span></div>' +
+
+    // MAP SECTION
+    '<div class="ms">' +
+    '<div class="mt">' +
+    '<span>📡 Mapa</span>' +
+    '<button class="lb active" id="btn-osm-' + p.id + '" onclick="swLayer(\'' + p.id + '\',\'osm\')">🗺️ Calles (OSM)</button>' +
+    '<button class="lb" id="btn-sat-' + p.id + '" onclick="swLayer(\'' + p.id + '\',\'sat\')">🛰️ Satélite</button>' +
+    '<button class="lb" id="btn-topo-' + p.id + '" onclick="swLayer(\'' + p.id + '\',\'topo\')">⛰️ Topográfico</button>' +
+    '</div>' +
+    '<div class="mc"><div id="map-' + p.id + '"></div></div></div>' +
+
+    infraHTML + obsHTML +
+
+    '<div class="sec"><div class="st">Seguimiento y Metas</div>' +
+    '<div class="sg">' +
+    '<div class="sf"><label>Estatus general</label><select id="seg-est-' + p.id + '" onchange="saveSeg(\'' + p.id + '\')">' +
+      '<option value="pendiente">⏳ Sin iniciar</option><option value="en-proceso">🔄 En proceso</option>' +
+      '<option value="avanzado">📈 Avanzado</option><option value="completado">✅ Completado</option></select></div>' +
+    '<div class="sf"><label>Prioridad</label><select id="seg-prio-' + p.id + '" onchange="saveSeg(\'' + p.id + '\')">' +
+      '<option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select></div>' +
+    '<div class="sf"><label>Responsable</label><input type="text" id="seg-resp-' + p.id + '" placeholder="Nombre" oninput="saveSeg(\'' + p.id + '\')"></div>' +
+    '<div class="sf"><label>Presupuesto estimado (MXN)</label><input type="text" id="seg-pres-' + p.id + '" placeholder="Ej. $50,000" oninput="saveSeg(\'' + p.id + '\')"></div>' +
+    '<div class="sf"><label>Fecha de inicio</label><input type="date" id="seg-fi-' + p.id + '" onchange="saveSeg(\'' + p.id + '\')"></div>' +
+    '<div class="sf"><label>Fecha meta</label><input type="date" id="seg-fm-' + p.id + '" onchange="saveSeg(\'' + p.id + '\')"></div>' +
+    '<div class="sf full"><label>Notas de seguimiento</label><textarea id="seg-notas-' + p.id + '" placeholder="Describe avances, acuerdos, pendientes…" oninput="saveSeg(\'' + p.id + '\')"></textarea></div>' +
+    '</div>' +
+    '<button class="bts" onclick="saveSeg(\'' + p.id + '\');showOk(\'ok-' + p.id + '\')">💾 Guardar seguimiento</button>' +
+    '<span class="sok" id="ok-' + p.id + '">✔ Guardado</span></div>' +
+
+    '<div class="sec"><div class="st">Bitácora de Actividades</div>' +
+    '<ul class="ll" id="log-' + p.id + '"></ul>' +
+    '<div class="alr"><input type="text" id="loginp-' + p.id + '" placeholder="Registrar actividad realizada…" onkeydown="if(event.key===\'Enter\')addLog(\'' + p.id + '\')">' +
+    '<button onclick="addLog(\'' + p.id + '\')">+ Agregar</button></div></div>' +
+    '</div>';
+}
+
+// ── MAP INIT ──
+function mkIcon(label) {
+  return L.divIcon({
+    html: '<div style="background:linear-gradient(135deg,#1a6e2e,#4caf50);color:#fff;' +
+      'border:2.5px solid #fff;border-radius:50% 50% 50% 0;width:30px;height:30px;' +
+      'display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;' +
+      'box-shadow:0 2px 8px rgba(0,0,0,.4);transform:rotate(-45deg)">' +
+      '<span style="transform:rotate(45deg)">' + label + '</span></div>',
+    className:'', iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-32]
+  });
+}
+
+function initMap(p) {
+  if (maps_[p.id]) { setTimeout(() => maps_[p.id].map.invalidateSize(), 100); return; }
+  const el = document.getElementById('map-' + p.id);
+  if (!el) return;
+
+  const map = L.map('map-' + p.id, { zoomControl:true, scrollWheelZoom:false }).setView([p.lat, p.lng], 16);
+  const osmL = L.tileLayer(TL.osm.url, { attribution:TL.osm.attr, maxZoom:TL.osm.maxZoom }).addTo(map);
+  const satL = L.tileLayer(TL.sat.url, { attribution:TL.sat.attr, maxZoom:TL.sat.maxZoom });
+  const topoL = L.tileLayer(TL.topo.url, { attribution:TL.topo.attr, maxZoom:TL.topo.maxZoom });
+
+  const idx = parques.findIndex(x => x.id === p.id) + 1;
+  L.marker([p.lat, p.lng], { icon: mkIcon(idx) }).addTo(map)
+    .bindPopup('<strong style="color:#1a6e2e">' + p.nombre + '</strong><br>' +
+      '<small>' + p.infra.length + ' elementos · ' +
+      '<a href="' + p.mapsUrl + '" target="_blank" style="color:#1a6e2e">Google Maps ↗</a></small>');
+
+  maps_[p.id] = { map, layers:{ osm:osmL, sat:satL, topo:topoL }, current:'osm' };
+  setTimeout(() => map.invalidateSize(), 250);
+}
+
+function swLayer(pid, key) {
+  const m = maps_[pid];
+  if (!m) return;
+  m.map.removeLayer(m.layers[m.current]);
+  m.map.addLayer(m.layers[key]);
+  m.current = key;
+  ['osm','sat','topo'].forEach(k => {
+    const b = document.getElementById('btn-' + k + '-' + pid);
+    if (b) b.classList.toggle('active', k === key);
+  });
+}
+
+function buildOverviewMap() {
+  const ovMap = L.map('overview-map', { scrollWheelZoom:false }).setView([22.150, -102.285], 13);
+
+  const osmBase = L.tileLayer(TL.osm.url, { attribution:TL.osm.attr, maxZoom:19 }).addTo(ovMap);
+  const satBase = L.tileLayer(TL.sat.url, { attribution:TL.sat.attr, maxZoom:19 });
+  const topoBase = L.tileLayer(TL.topo.url, { attribution:TL.topo.attr, maxZoom:17 });
+
+  L.control.layers({
+    '🗺️ Calles (OSM)': osmBase,
+    '🛰️ Satélite (Esri)': satBase,
+    '⛰️ Topográfico': topoBase
+  }, {}, { position:'topright', collapsed:false }).addTo(ovMap);
+
+  parques.forEach((p, idx) => {
+    const icon = L.divIcon({
+      html: '<div style="background:#1a6e2e;color:#fff;border:2px solid #fff;border-radius:50%;' +
+        'width:24px;height:24px;display:flex;align-items:center;justify-content:center;' +
+        'font-size:10px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.4)">' + (idx+1) + '</div>',
+      className:'', iconSize:[24,24], iconAnchor:[12,12], popupAnchor:[0,-13]
+    });
+    L.marker([p.lat, p.lng], { icon }).addTo(ovMap)
+      .bindPopup('<strong style="color:#1a6e2e">' + p.nombre + '</strong><br>' +
+        '<small>' + p.infra.length + ' elementos</small><br>' +
+        '<a href="#" onclick="showTab(\'' + p.id + '\',document.getElementById(\'tab-' + p.id + '\'));return false;" ' +
+        'style="color:#1a6e2e;font-size:.74rem">Ver ficha completa ↗</a>');
+  });
+}
+
+// ── INTERACTIONS ──
+function showTab(id, btn) {
+  document.querySelectorAll('.tb').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pn').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const pn = document.getElementById('panel-' + id);
+  if (pn) pn.classList.add('active');
+  btn.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+  if (id !== 'general') {
+    const p = parques.find(x => x.id === id);
+    if (p) setTimeout(() => initMap(p), 80);
+  }
+}
+
+function updItem(pid, idx, sel) {
+  sel.className = 'es e' + sel.value.replace('-proceso','e').replace('pendiente','p').replace('completado','c');
+  // simpler class map
+  sel.className = 'es ' + (sel.value==='pendiente'?'ep': sel.value==='en-proceso'?'ee':'ec');
+  state[pid].items[idx].estado = sel.value;
+  updateProgress(pid); updateStats();
+}
+
+function saveMeta(pid, idx, val) { state[pid].items[idx].meta = val; }
+
+function saveSeg(pid) {
+  const s = state[pid];
+  s.estatus    = document.getElementById('seg-est-' + pid)?.value || s.estatus;
+  s.prioridad  = document.getElementById('seg-prio-' + pid)?.value || s.prioridad;
+  s.responsable= document.getElementById('seg-resp-' + pid)?.value || '';
+  s.presupuesto= document.getElementById('seg-pres-' + pid)?.value || '';
+  s.fechaInicio= document.getElementById('seg-fi-' + pid)?.value || '';
+  s.fechaMeta  = document.getElementById('seg-fm-' + pid)?.value || '';
+  s.notas      = document.getElementById('seg-notas-' + pid)?.value || '';
+  updateProgress(pid); updateStats();
+}
+
+function showOk(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = 'inline';
+  setTimeout(() => { el.style.display = 'none'; }, 2000);
+}
+
+function addLog(pid) {
+  const inp = document.getElementById('loginp-' + pid);
+  if (!inp || !inp.value.trim()) return;
+  const d = new Date().toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
+  state[pid].log.unshift({ date:d, text:inp.value.trim() });
+  renderLog(pid);
+  inp.value = '';
+}
+
+function renderLog(pid) {
+  const ul = document.getElementById('log-' + pid);
+  if (!ul) return;
+  ul.innerHTML = state[pid].log.slice(0,20).map(e =>
+    '<li><span class="ld">' + e.date + '</span> ' + e.text + '</li>'
+  ).join('') || '<li style="color:#bbb;font-style:italic">Sin actividad registrada.</li>';
+}
+
+function updateProgress(pid) {
+  const p = parques.find(x => x.id === pid);
+  const s = state[pid];
+  let pct = 0;
+  if (p.infra.length > 0) {
+    const done = s.items.filter(i => i.estado === 'completado').length;
+    const part = s.items.filter(i => i.estado === 'en-proceso').length;
+    pct = Math.round(((done + part * 0.5) / p.infra.length) * 100);
+  } else {
+    pct = {pendiente:0,'en-proceso':30,avanzado:70,completado:100}[s.estatus] || 0;
+  }
+  const bar = document.getElementById('bar-' + pid);
+  const pctEl = document.getElementById('pct-' + pid);
+  if (bar) bar.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+
+  const ob = document.getElementById('ovbar-' + pid);
+  const oe = document.getElementById('ovest-' + pid);
+  if (ob) ob.style.width = pct + '%';
+  if (oe) {
+    const cls = pct >= 100 ? 'oco' : pct >= 60 ? 'oav' : pct > 0 ? 'opr' : 'osi';
+    const lbl = pct >= 100 ? 'Completado' : pct >= 60 ? 'Avanzado' : pct > 0 ? 'En proceso' : 'Sin iniciar';
+    oe.className = 'oe ' + cls;
+    oe.textContent = lbl;
+  }
+}
+
+function updateStats() {
+  let pe = 0, en = 0, co = 0, tp = 0;
+  parques.forEach(p => {
+    const s = state[p.id];
+    if (s.estatus === 'pendiente') pe++;
+    else if (s.estatus === 'en-proceso' || s.estatus === 'avanzado') en++;
+    else if (s.estatus === 'completado') co++;
+    if (p.infra.length > 0) {
+      const done = s.items.filter(i => i.estado === 'completado').length;
+      const part = s.items.filter(i => i.estado === 'en-proceso').length;
+      tp += Math.round(((done + part * 0.5) / p.infra.length) * 100);
+    }
+  });
+  document.getElementById('st-p').textContent = pe;
+  document.getElementById('st-e').textContent = en;
+  document.getElementById('st-c').textContent = co;
+  const avg = Math.round(tp / parques.length);
+  document.getElementById('st-pct').textContent = (isNaN(avg) ? 0 : avg) + '%';
+}
+
+function filterTabs() {
+  const q = document.getElementById('srch-in').value.toLowerCase();
+  document.querySelectorAll('.tb').forEach(b => {
+    if (b.id === 'tab-general') return;
+    b.style.display = (b.getAttribute('data-name') || '').includes(q) ? '' : 'none';
+  });
+}
+
+buildUI();
+
+// Expose functions to global scope (type="module" requires this for inline onclick)
+window.showTab = showTab;
+window.swLayer = swLayer;
+window.updItem = updItem;
+window.saveMeta = saveMeta;
+window.saveSeg = saveSeg;
+window.showOk = showOk;
+window.addLog = addLog;
+window.filterTabs = filterTabs;
+
+
+// ============================================================
+// FIREBASE — Firestore persistence
+// ============================================================
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCJHWkgE8WikDOR22xtdmDxTq6h1migvRY",
+  authDomain: "parques-pabellon.firebaseapp.com",
+  projectId: "parques-pabellon",
+  storageBucket: "parques-pabellon.firebasestorage.app",
+  messagingSenderId: "833734169897",
+  appId: "1:833734169897:web:585da3002572935a029338"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+// ── Indicador de sincronización ──
+const syncEl = document.createElement('div');
+syncEl.id = 'sync-indicator';
+syncEl.style.cssText = `position:fixed;bottom:16px;right:16px;background:#1a6e2e;color:#fff;
+  padding:7px 14px;border-radius:20px;font-size:.74rem;font-family:var(--mono);
+  font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.25);display:none;z-index:9999;
+  transition:opacity .3s`;
+document.body.appendChild(syncEl);
+
+function showSync(msg, color='#1a6e2e') {
+  syncEl.textContent = msg;
+  syncEl.style.background = color;
+  syncEl.style.display = 'block';
+  syncEl.style.opacity = '1';
+}
+function hideSync() {
+  syncEl.style.opacity = '0';
+  setTimeout(() => { syncEl.style.display = 'none'; }, 400);
+}
+
+// ── Guardar estado de un parque en Firestore ──
+async function saveToFirebase(pid) {
+  try {
+    showSync('☁️ Guardando…');
+    const s = state[pid];
+    await setDoc(doc(db, 'parques', pid), {
+      estatus: s.estatus,
+      prioridad: s.prioridad,
+      responsable: s.responsable,
+      fechaInicio: s.fechaInicio,
+      fechaMeta: s.fechaMeta,
+      presupuesto: s.presupuesto,
+      notas: s.notas,
+      log: s.log,
+      items: s.items,
+      updatedAt: new Date().toISOString()
+    });
+    showSync('✅ Guardado en Firebase', '#1a6e2e');
+    setTimeout(hideSync, 2000);
+  } catch(e) {
+    showSync('❌ Error al guardar', '#c0392b');
+    setTimeout(hideSync, 3000);
+    console.error('Firebase save error:', e);
+  }
+}
+
+// ── Cargar todos los parques desde Firestore al iniciar ──
+async function loadFromFirebase() {
+  try {
+    showSync('☁️ Cargando avances…');
+    const snap = await getDocs(collection(db, 'parques'));
+    snap.forEach(docSnap => {
+      const pid = docSnap.id;
+      const data = docSnap.data();
+      if (!state[pid]) return;
+      // Merge data into state
+      Object.assign(state[pid], {
+        estatus:     data.estatus     || 'pendiente',
+        prioridad:   data.prioridad   || 'media',
+        responsable: data.responsable || '',
+        fechaInicio: data.fechaInicio || '',
+        fechaMeta:   data.fechaMeta   || '',
+        presupuesto: data.presupuesto || '',
+        notas:       data.notas       || '',
+        log:         data.log         || [],
+        items:       data.items       || state[pid].items,
+      });
+    });
+    // Refresh all UI after load
+    parques.forEach(p => {
+      restoreUI(p.id);
+      updateProgress(p.id);
+      renderLog(p.id);
+    });
+    updateStats();
+    showSync('✅ Avances cargados', '#1565c0');
+    setTimeout(hideSync, 2000);
+  } catch(e) {
+    showSync('⚠️ Sin conexión — modo local', '#e8a200');
+    setTimeout(hideSync, 3000);
+    console.warn('Firebase load error:', e);
+  }
+}
+
+// ── Restaurar valores en los campos del DOM ──
+function restoreUI(pid) {
+  const s = state[pid];
+  const get = id => document.getElementById(id);
+
+  // Seguimiento fields
+  if (get('seg-est-'  + pid)) get('seg-est-'  + pid).value = s.estatus;
+  if (get('seg-prio-' + pid)) get('seg-prio-' + pid).value = s.prioridad;
+  if (get('seg-resp-' + pid)) get('seg-resp-' + pid).value = s.responsable;
+  if (get('seg-pres-' + pid)) get('seg-pres-' + pid).value = s.presupuesto;
+  if (get('seg-fi-'   + pid)) get('seg-fi-'   + pid).value = s.fechaInicio;
+  if (get('seg-fm-'   + pid)) get('seg-fm-'   + pid).value = s.fechaMeta;
+  if (get('seg-notas-'+ pid)) get('seg-notas-'+ pid).value = s.notas;
+
+  // Item states
+  s.items.forEach((item, i) => {
+    const sel = get('itsel-'  + pid + '-' + i);
+    const met = get('itmeta-' + pid + '-' + i);
+    if (sel) {
+      sel.value = item.estado;
+      sel.className = 'es ' + (item.estado==='pendiente'?'ep': item.estado==='en-proceso'?'ee':'ec');
+    }
+    if (met) met.value = item.meta || '';
+  });
+}
+
+// ── Override globals to also save to Firebase ──
+window.saveSeg = function(pid) {
+  saveSeg(pid);
+  saveToFirebase(pid);
+};
+window.updItem = function(pid, idx, sel) {
+  updItem(pid, idx, sel);
+  saveToFirebase(pid);
+};
+window.saveMeta = function(pid, idx, val) {
+  saveMeta(pid, idx, val);
+  clearTimeout(window._metaTimer);
+  window._metaTimer = setTimeout(() => saveToFirebase(pid), 1200);
+};
+window.addLog = function(pid) {
+  addLog(pid);
+  saveToFirebase(pid);
+};
+
+// ── Boot: load data after UI is built ──
+loadFromFirebase();
+
