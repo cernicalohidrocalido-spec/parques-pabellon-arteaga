@@ -248,6 +248,30 @@
     .park-hero { flex-direction: column; }
   }
 
+  /* ── DOWNLOAD BUTTONS ── */
+  .btn-download {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 15px; border: none; border-radius: 8px; cursor: pointer;
+    font-size: 0.80rem; font-weight: 700; transition: all .18s;
+    background: #1565c0; color: white; box-shadow: 0 2px 6px rgba(21,101,192,.3);
+  }
+  .btn-download:hover { background: #0d47a1; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(21,101,192,.4); }
+  .btn-download.verde { background: #2e7d32; box-shadow: 0 2px 6px rgba(46,125,50,.3); }
+  .btn-download.verde:hover { background: #1b5e20; }
+  .download-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+
+  /* ── DOWNLOAD BUTTONS ── */
+  .btn-download {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 15px; border: none; border-radius: 8px; cursor: pointer;
+    font-size: 0.80rem; font-weight: 700; transition: all .18s;
+    background: #1565c0; color: white; box-shadow: 0 2px 6px rgba(21,101,192,.3);
+  }
+  .btn-download:hover { background: #0d47a1; transform: translateY(-1px); }
+  .btn-download.verde { background: #2e7d32; box-shadow: 0 2px 6px rgba(46,125,50,.3); }
+  .btn-download.verde:hover { background: #1b5e20; }
+  .download-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; padding: 12px 16px; background: #f1f8e9; border-radius: 10px; border: 1px solid #c5e1a5; }
+
   /* ── LEAFLET MAPS ── */
   #overview-map { height: 360px; border-radius: 12px; overflow: hidden; box-shadow: var(--sombra); margin-bottom: 16px; }
   .map-container { height: 260px; border-radius: 10px; overflow: hidden; margin: 6px 0 14px; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
@@ -256,9 +280,310 @@
   .map-toolbar span { font-size: .75rem; font-weight: 600; color: var(--verde-oscuro); }
   .layer-btn { padding: 4px 10px; border: 1.5px solid var(--borde); border-radius: 6px; background: white; font-size: .72rem; cursor: pointer; font-weight: 500; transition: all .15s; }
   .layer-btn.active, .layer-btn:hover { background: var(--verde); color: white; border-color: var(--verde); }
+
+/* ================================================================
+   MODO TABLET — Optimizado para pantallas de 11"+ (768px–1400px)
+   Touch targets ≥ 48px · Tipografía campo · Layout doble columna
+================================================================ */
+@media (min-width: 768px) {
+
+  /* ── Base: fuente raíz más grande para legibilidad en campo ── */
+  html { font-size: 17px; }
+
+  /* ── HEADER más compacto y legible ── */
+  header { padding: 12px 28px; gap: 16px; }
+  header h1 { font-size: 1.1rem; }
+  header p  { font-size: 0.82rem; }
+  .header-escudo { width: 48px; height: 48px; font-size: 22px; }
+
+  /* ── STATS: más grandes, fácil lectura rápida ── */
+  .resumen-global { margin: 16px 24px 0; padding: 16px 22px; }
+  .stat-card { padding: 14px 18px; min-width: 130px; }
+  .stat-card .num { font-size: 2rem; }
+  .stat-card .lbl { font-size: 0.82rem; }
+
+  /* ── BUSCADOR: touch target ≥ 48px ── */
+  .search-bar { margin: 14px 24px 0; }
+  .search-bar input {
+    padding: 13px 18px;
+    font-size: 1rem;
+    min-height: 48px;
+    border-radius: 10px;
+  }
+
+  /* ── TABS CONTAINER: sidebar vertical en tablet ── */
+  .tabs-container { margin: 0; padding: 0; border-bottom: none; }
+
+  /* ── LAYOUT PRINCIPAL: sidebar + contenido ── */
+  .app-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    margin: 14px 24px 28px;
+    min-height: calc(100vh - 200px);
+    align-items: start;
+  }
+
+  /* ── SIDEBAR de navegación de parques ── */
+  .tabs-scroll {
+    flex-direction: column;
+    overflow-x: visible;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+    padding: 8px 0 8px 0;
+    gap: 3px;
+    background: #f0f7f0;
+    border-radius: 12px 0 0 12px;
+    border: 1.5px solid #c5ddc5;
+    border-right: none;
+  }
+  .tabs-scroll::-webkit-scrollbar { width: 5px; }
+  .tabs-scroll::-webkit-scrollbar-thumb { background: #a5c8a5; border-radius: 4px; }
+
+  /* ── TAB BUTTONS: touch targets 48px+ ── */
+  .tab-btn {
+    min-height: 52px;
+    padding: 12px 16px;
+    border-radius: 8px 0 0 8px !important;
+    border: none !important;
+    border-left: 4px solid transparent !important;
+    text-align: left;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    box-shadow: none !important;
+    background: transparent !important;
+    color: #2d5a2d;
+    transform: none !important;
+  }
+  .tab-btn:hover {
+    background: #dceedd !important;
+    border-left-color: #66bb6a !important;
+    color: #1b5e20;
+  }
+  .tab-btn.active {
+    background: white !important;
+    border-left-color: var(--verde) !important;
+    color: var(--verde);
+    font-weight: 800;
+    box-shadow: 2px 0 8px rgba(0,0,0,.08) !important;
+  }
+  .tab-btn .badge {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .tab-btn.active .badge {
+    background: rgba(26,110,46,.15);
+    color: var(--verde);
+  }
+
+  /* ── PANEL CONTAINER: ocupa la columna derecha ── */
+  .panel-container {
+    margin: 0 !important;
+    border-radius: 0 12px 12px 0;
+    border: 1.5px solid #c5ddc5;
+    border-left: none;
+    background: white;
+    min-height: 600px;
+  }
+  .panel.active {
+    border-radius: 0 12px 12px 0;
+  }
+
+  /* ── PARK HERO: más compacto y legible ── */
+  .park-hero { padding: 18px 24px; }
+  .park-hero h2 { font-size: 1.2rem; }
+
+  /* ── SECCIÓN DOBLE COLUMNA: mapa + tabla lado a lado ── */
+  .panel-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .panel-two-col .section:first-child {
+    border-right: 1.5px solid #e8f0e8;
+  }
+
+  /* ── MAPA más alto en tablet ── */
+  .map-container { height: 320px; }
+  #overview-map  { height: 420px; }
+
+  /* ── TABLA DE INFRAESTRUCTURA ── */
+  .needs-table { font-size: 0.92rem; }
+  .needs-table th { font-size: 0.80rem; padding: 10px 12px; }
+  .needs-table td { padding: 10px 12px; }
+
+  /* ── SELECTORES DE ESTADO: touch targets grandes ── */
+  .estado-select {
+    min-height: 48px !important;
+    padding: 10px 12px !important;
+    font-size: 0.90rem !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 160px;
+  }
+  .estado-pendiente  { background: #fff8e1; color: #e65100; border-color: #ffcc02 !important; }
+  .estado-en-proceso { background: #e3f2fd; color: #0d47a1; border-color: #42a5f5 !important; }
+  .estado-completado { background: #e8f5e9; color: #1b5e20; border-color: #66bb6a !important; }
+  .estado-no-aplica  { background: #f5f5f5; color: #757575; border-color: #bdbdbd !important; }
+
+  /* ── BOTONES DE CAPA DEL MAPA: touch 48px ── */
+  .layer-btn {
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+    font-size: 0.88rem !important;
+    border-radius: 8px !important;
+  }
+  .map-toolbar { gap: 8px; margin-bottom: 10px; }
+
+  /* ── SEGUIMIENTO: dos columnas ── */
+  .seguimiento-area {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px;
+  }
+
+  /* ── INPUTS Y SELECTS del seguimiento: touch 48px ── */
+  .seguimiento-field input,
+  .seguimiento-field select,
+  .seguimiento-field textarea {
+    min-height: 48px !important;
+    padding: 11px 14px !important;
+    font-size: 0.95rem !important;
+    border-radius: 8px !important;
+  }
+  .seguimiento-field label {
+    font-size: 0.82rem !important;
+    margin-bottom: 5px;
+  }
+
+  /* ── BOTÓN GUARDAR: grande y visible ── */
+  .btn-save {
+    min-height: 52px !important;
+    padding: 14px 28px !important;
+    font-size: 1rem !important;
+    border-radius: 10px !important;
+    letter-spacing: .02em;
+  }
+
+  /* ── BOTONES DE DESCARGA ── */
+  .btn-download {
+    min-height: 48px !important;
+    padding: 12px 18px !important;
+    font-size: 0.88rem !important;
+    border-radius: 9px !important;
+  }
+  .download-bar { padding: 14px 20px; gap: 10px; }
+
+  /* ── BITÁCORA: input más alto ── */
+  .add-log-row input {
+    min-height: 48px;
+    padding: 11px 14px;
+    font-size: 0.95rem;
+  }
+  .add-log-row button {
+    min-height: 48px;
+    padding: 11px 20px;
+    font-size: 0.92rem;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+  .log-list li { padding: 10px 0; font-size: 0.92rem; line-height: 1.5; }
+
+  /* ── OVERVIEW CARDS: más grandes para tapping ── */
+  .overview-item {
+    padding: 16px 18px;
+    min-height: 90px;
+    gap: 8px;
+  }
+  .overview-item h3 { font-size: 0.95rem; }
+  .overview-item .ov-estado { font-size: 0.80rem; padding: 4px 10px; }
+
+  /* ── SECTION TITLES ── */
+  .section-title { font-size: 0.88rem; padding: 12px 20px; }
+  .section { padding-bottom: 4px; }
+
+  /* ── BARRA DE CAPAS DEL OVERVIEW MAP ── */
+  .leaflet-control-layers-toggle {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+} /* end @media tablet */
+
+/* ── Toggle tablet mode button (visible always) ── */
+#tablet-toggle {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9000;
+  background: #1565c0;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+}
+#tablet-toggle:hover { background: #0d47a1; transform: scale(1.1); }
+#tablet-toggle.active { background: #2e7d32; }
+
+
+/* Force tablet mode via JS toggle */
+body.force-tablet .app-layout {
+  display: grid !important;
+  grid-template-columns: 260px 1fr !important;
+  margin: 14px 24px 28px !important;
+}
+body.force-tablet .tabs-scroll {
+  flex-direction: column !important;
+  overflow-x: visible !important;
+  overflow-y: auto !important;
+  max-height: calc(100vh - 200px) !important;
+  background: #f0f7f0 !important;
+  border-radius: 12px 0 0 12px !important;
+  border: 1.5px solid #c5ddc5 !important;
+  border-right: none !important;
+  padding: 8px 0 !important;
+  gap: 3px !important;
+}
+body.force-tablet .tab-btn {
+  min-height: 52px !important; padding: 12px 16px !important;
+  border-radius: 8px 0 0 8px !important; border: none !important;
+  border-left: 4px solid transparent !important;
+  text-align: left !important; width: 100% !important;
+  display: flex !important; align-items: center !important;
+  justify-content: space-between !important;
+  background: transparent !important; box-shadow: none !important;
+  color: #2d5a2d !important; transform: none !important;
+  font-size: 0.88rem !important;
+}
+body.force-tablet .tab-btn:hover  { background: #dceedd !important; border-left-color: #66bb6a !important; }
+body.force-tablet .tab-btn.active { background: white !important; border-left-color: var(--verde) !important; font-weight: 800 !important; }
+body.force-tablet .panel-container { margin: 0 !important; border-radius: 0 12px 12px 0 !important; border: 1.5px solid #c5ddc5 !important; border-left: none !important; }
+body.force-tablet .estado-select   { min-height: 48px !important; padding: 10px 12px !important; font-size: 0.90rem !important; }
+body.force-tablet .layer-btn        { min-height: 44px !important; padding: 10px 16px !important; }
+body.force-tablet .btn-save         { min-height: 52px !important; padding: 14px 28px !important; font-size: 1rem !important; }
+body.force-tablet .seguimiento-area { grid-template-columns: repeat(2,1fr) !important; }
+body.force-tablet .map-container    { height: 320px !important; }
 </style>
 </head>
 <body>
+
+<button id="tablet-toggle" title="Modo tablet" onclick="toggleTablet()">📱</button>
 
 <header>
   <div class="header-escudo">🌿</div>
@@ -281,24 +606,39 @@
   <input type="text" id="search-input" placeholder="🔍 Buscar parque por nombre…" oninput="filterTabs()">
 </div>
 
+<div class="app-layout">
+<div class="app-layout">
 <div class="tabs-container">
   <div class="tabs-scroll" id="tabs-scroll">
-    <button class="tab-btn active" id="tab-general">📋 General</button>
+    <button class="tab-btn active" id="tab-general"><span><i class="fa-solid fa-map fa-fw" style="margin-right:6px"></i>General</span><span class="badge">27</span></button>
   </div>
 </div>
 
 <div class="panel-container">
   <div class="panel active" id="panel-general">
     <div style="background:white;border-radius:0 12px 12px 12px;padding:20px 22px;box-shadow:var(--sombra);">
+      <div class="download-bar">
+        <span style="font-size:.82rem;color:var(--gris-oscuro);font-weight:600">📥 Descargar:</span>
+        <button class="btn-download verde" onclick="exportarResumenXLS()">📊 Resumen general (.xlsx)</button>
+        <button class="btn-download" onclick="exportarTodosXLS()">📋 Todos los parques (.xlsx)</button>
+      </div>
+      <div class="download-bar">
+        <span style="font-size:.82rem;font-weight:600;color:#2e7d32">📥 Descargar:</span>
+        <button class="btn-download verde" onclick="exportarResumenXLS()">📊 Resumen general (.xlsx)</button>
+        <button class="btn-download" onclick="exportarTodosXLS()">📋 Todos los parques (.xlsx)</button>
+      </div>
       <p style="color:var(--gris-oscuro);font-size:0.88rem;margin-bottom:16px;">Vista general. Haz clic en un marcador o pestaña para ver la ficha completa de cada área verde.</p>
       <div id="overview-map"></div>
       <div class="overview-grid" id="overview-grid"></div>
     </div>
   </div>
 </div>
+</div><!-- /.app-layout -->
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
@@ -972,9 +1312,10 @@ function updateParkProgress(parkId) {
   const s = state[parkId];
   let pct = 0;
   if (p.infraestructura.length > 0) {
+    const applicable = s.items.filter(i => i.estado !== 'no-aplica').length || 1;
     const done = s.items.filter(i => i.estado === 'completado').length;
     const partial = s.items.filter(i => i.estado === 'en-proceso').length;
-    pct = Math.round(((done + partial * 0.5) / p.infraestructura.length) * 100);
+    pct = Math.round(((done + partial * 0.5) / applicable) * 100);
   } else {
     // Sin infraestructura listada, se basa en estatus general
     const map = { pendiente: 0, 'en-proceso': 30, avanzado: 70, completado: 100 };
@@ -1064,7 +1405,8 @@ function initMap(p) {
       '<small>' + p.infraestructura.length + ' elementos · ' +
       '<a href="' + p.mapsUrl + '" target="_blank" style="color:#1a6e2e">Google Maps ↗</a></small>');
   maps_[p.id] = { map, layers: { osm: osmL, sat: satL, topo: topoL }, current: 'osm' };
-  setTimeout(() => map.invalidateSize(), 300);
+  setTimeout(() => map.invalidateSize(), 200);
+  setTimeout(() => map.invalidateSize(), 600);
 }
 
 function swLayer(pid, key) {
@@ -1128,7 +1470,18 @@ function buildUI() {
     btn.className = 'tab-btn';
     btn.id = 'tab-' + p.id;
     btn.setAttribute('data-name', p.nombre.toLowerCase());
-    btn.innerHTML = p.nombre + ' <span class="badge">' + p.infraestructura.length + '</span>';
+    // Pick icon by park type keywords
+    const nombre = p.nombre.toLowerCase();
+    const icon = nombre.includes('plaza') ? 'fa-building-columns'
+               : nombre.includes('jardín') || nombre.includes('jardin') ? 'fa-seedling'
+               : nombre.includes('canchas') || nombre.includes('skate') ? 'fa-futbol'
+               : nombre.includes('glorieta') ? 'fa-circle-dot'
+               : nombre.includes('escuadra') ? 'fa-road'
+               : nombre.includes('velaría') || nombre.includes('velaria') ? 'fa-tent'
+               : nombre.includes('fraccionamiento') || nombre.includes('fovissste') ? 'fa-house'
+               : nombre.includes('cosmos') || nombre.includes('lineal') || nombre.includes('progreso') ? 'fa-tree'
+               : 'fa-leaf';
+    btn.innerHTML = '<span><i class="fa-solid ' + icon + ' fa-fw" style="margin-right:6px;opacity:.8"></i>' + p.nombre + '</span><span class="badge">' + p.infraestructura.length + '</span>';
     btn.onclick = () => showTab(p.id, btn);
     tabsScroll.appendChild(btn);
 
@@ -1175,6 +1528,7 @@ function buildParkPanel(p, num) {
           <option value="pendiente">⏳ Pendiente</option>
           <option value="en-proceso">🔄 En proceso</option>
           <option value="completado">✅ Completado</option>
+          <option value="no-aplica">➖ No aplica</option>
         </select></td>
         <td><input class="meta-input" type="text" id="item-meta-${id}-${i}"
           placeholder="${meta}" oninput="saveItemMeta('${id}',${i},this.value)"></td>
@@ -1252,6 +1606,7 @@ function buildParkPanel(p, num) {
           <textarea id="seg-notas-${id}" placeholder="Describe avances, acuerdos, pendientes…" oninput="saveSeg('${id}')"></textarea></div>
       </div>
       <button class="btn-save" onclick="saveSeg('${id}'); showOk('ok-${id}')">💾 Guardar seguimiento</button>
+      <button class="btn-download" style="margin-left:8px" onclick="exportarParqueXLS('${id}')">📥 Descargar ficha (.xlsx)</button>
       <span class="save-ok" id="ok-${id}">✔ Guardado</span>
     </div>
 
@@ -1275,7 +1630,7 @@ window.showTab = function(id, btn) {
   _origShowTab(id, btn);
   if (id !== 'general') {
     const p = parques.find(x => x.id === id);
-    if (p) setTimeout(() => initMap(p), 80);
+    if (p) setTimeout(() => initMap(p), 150);
   }
 };
 
@@ -1376,7 +1731,10 @@ function restoreUI(pid) {
   s.items.forEach((item, i) => {
     const sel = g('item-estado-' + pid + '-' + i);
     const met = g('item-meta-'   + pid + '-' + i);
-    if (sel) { sel.value = item.estado; sel.className = 'estado-select estado-' + item.estado; }
+    if (sel) {
+      sel.value = item.estado;
+      sel.className = 'estado-select estado-' + (item.estado || 'pendiente');
+    }
     if (met) met.value = item.meta || '';
   });
 }
@@ -1389,7 +1747,7 @@ const _updateItemEstado = updateItemEstado;
 const _saveItemMeta    = saveItemMeta;
 const _addLog          = addLog;
 
-window.showTab          = showTab;
+// window.showTab is already set above with map-init wrapper — do NOT overwrite
 window.swLayer          = swLayer;
 window.filterTabs       = filterTabs;
 window.showOk           = showOk;
@@ -1407,6 +1765,231 @@ window.saveItemMeta = function(pid, idx, val) {
 window.addLog = function(pid) {
   _addLog(pid); saveToFirebase(pid);
 };
+
+
+// ================================================================
+// EXPORTAR A EXCEL (SheetJS)
+// ================================================================
+
+function getFechaHoy() {
+  return new Date().toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+// Estado legible
+function estadoLabel(e) {
+  return { pendiente:'Sin iniciar', 'en-proceso':'En proceso', completado:'Completado', 'no-aplica':'No aplica' }[e] || e;
+}
+
+// ── Resumen general: una fila por parque ──
+function exportarResumenXLS() {
+  const rows = [
+    ['#', 'Parque / Área Verde', 'Estatus', 'Prioridad', 'Responsable',
+     'Presupuesto (MXN)', 'Fecha inicio', 'Fecha meta',
+     'Elementos totales', 'Completados', 'En proceso', 'Sin iniciar', 'No aplica',
+     '% Avance', 'Notas']
+  ];
+  parques.forEach((p, i) => {
+    const s = state[p.id];
+    const items = s.items;
+    const total    = items.length;
+    const comp     = items.filter(x => x.estado === 'completado').length;
+    const enProc   = items.filter(x => x.estado === 'en-proceso').length;
+    const sinInic  = items.filter(x => x.estado === 'pendiente').length;
+    const noAplica = items.filter(x => x.estado === 'no-aplica').length;
+    const aplicable = items.filter(x => x.estado !== 'no-aplica').length || 1;
+    const pct = Math.round(((comp + enProc * 0.5) / aplicable) * 100);
+    rows.push([
+      i + 1, p.nombre,
+      estadoLabel(s.estatus), s.prioridad || 'media',
+      s.responsable || '', s.presupuesto || '',
+      s.fechaInicio || '', s.fechaMeta || '',
+      total, comp, enProc, sinInic, noAplica,
+      pct + '%', s.notas || ''
+    ]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:4},{wch:36},{wch:14},{wch:10},{wch:20},
+    {wch:16},{wch:12},{wch:12},
+    {wch:8},{wch:10},{wch:10},{wch:10},{wch:10},
+    {wch:8},{wch:40}
+  ];
+  // Freeze header row
+  ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Resumen General');
+  XLSX.writeFile(wb, `Resumen_Parques_${getFechaHoy().replace(/\//g,'-')}.xlsx`);
+}
+
+// ── Todos los parques: una hoja por parque ──
+function exportarTodosXLS() {
+  const wb = XLSX.utils.book_new();
+
+  // Hoja de resumen
+  const resRows = [['#','Parque','Estatus','Prioridad','Responsable','Presupuesto','F.Inicio','F.Meta','% Avance']];
+  parques.forEach((p, i) => {
+    const s = state[p.id];
+    const items = s.items;
+    const aplicable = items.filter(x => x.estado !== 'no-aplica').length || 1;
+    const comp = items.filter(x => x.estado === 'completado').length;
+    const enProc = items.filter(x => x.estado === 'en-proceso').length;
+    const pct = Math.round(((comp + enProc * 0.5) / aplicable) * 100);
+    resRows.push([i+1, p.nombre, estadoLabel(s.estatus), s.prioridad||'media',
+      s.responsable||'', s.presupuesto||'', s.fechaInicio||'', s.fechaMeta||'', pct+'%']);
+  });
+  const wsRes = XLSX.utils.aoa_to_sheet(resRows);
+  wsRes['!cols'] = [{wch:4},{wch:36},{wch:14},{wch:10},{wch:20},{wch:16},{wch:12},{wch:12},{wch:8}];
+  XLSX.utils.book_append_sheet(wb, wsRes, 'Resumen');
+
+  // Una hoja por parque
+  parques.forEach(p => {
+    const s = state[p.id];
+    const rows = [];
+
+    // Encabezado del parque
+    rows.push(['PARQUE:', p.nombre]);
+    rows.push(['Estatus:', estadoLabel(s.estatus), 'Prioridad:', s.prioridad||'media']);
+    rows.push(['Responsable:', s.responsable||'', 'Presupuesto:', s.presupuesto||'']);
+    rows.push(['Fecha inicio:', s.fechaInicio||'', 'Fecha meta:', s.fechaMeta||'']);
+    rows.push(['Notas:', s.notas||'']);
+    rows.push([]);
+
+    // Infraestructura
+    if (p.infraestructura.length > 0) {
+      rows.push(['#','Elemento','Indicador','Estado','Meta / Cantidad','Observación']);
+      p.infraestructura.forEach((it, i) => {
+        const item = s.items[i] || {};
+        rows.push([
+          i + 1, it.item, it.indicador || '—',
+          estadoLabel(item.estado || 'pendiente'),
+          item.meta || it.meta || '',
+          it.obs || ''
+        ]);
+      });
+      rows.push([]);
+    }
+
+    // Observaciones del diagnóstico
+    if (p.observaciones && p.observaciones.length > 0) {
+      rows.push(['OBSERVACIONES DEL DIAGNÓSTICO:']);
+      p.observaciones.forEach((o, i) => rows.push([i + 1, o]));
+      rows.push([]);
+    }
+
+    // Bitácora
+    if (s.log && s.log.length > 0) {
+      rows.push(['BITÁCORA DE ACTIVIDADES:']);
+      rows.push(['Fecha', 'Actividad']);
+      s.log.forEach(e => rows.push([e.date, e.text]));
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{wch:4},{wch:32},{wch:28},{wch:14},{wch:16},{wch:30}];
+
+    // Sheet name max 31 chars, no special chars
+    const sheetName = p.nombre.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]/g,'').substring(0, 28);
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  });
+
+  XLSX.writeFile(wb, `Parques_Pabellon_Arteaga_${getFechaHoy().replace(/\//g,'-')}.xlsx`);
+}
+
+// ── Exportar ficha individual de un parque ──
+function exportarParqueXLS(pid) {
+  const p = parques.find(x => x.id === pid);
+  if (!p) return;
+  const s = state[pid];
+  const wb = XLSX.utils.book_new();
+  const rows = [];
+
+  rows.push(['SISTEMA DE REHABILITACIÓN DE ÁREAS VERDES']);
+  rows.push(['H. Ayuntamiento de Pabellón de Arteaga · IMBIO · 2024–2027']);
+  rows.push([]);
+  rows.push(['PARQUE:', p.nombre]);
+  rows.push(['Google Maps:', p.mapsUrl]);
+  rows.push([]);
+  rows.push(['Estatus general:', estadoLabel(s.estatus)]);
+  rows.push(['Prioridad:', s.prioridad || 'media']);
+  rows.push(['Responsable:', s.responsable || '']);
+  rows.push(['Presupuesto estimado (MXN):', s.presupuesto || '']);
+  rows.push(['Fecha de inicio:', s.fechaInicio || '']);
+  rows.push(['Fecha meta:', s.fechaMeta || '']);
+  rows.push(['Notas:', s.notas || '']);
+  rows.push([]);
+
+  // Infraestructura
+  if (p.infraestructura.length > 0) {
+    rows.push(['FICHA DE NECESIDADES — INFRAESTRUCTURA Y EQUIPO']);
+    rows.push(['#', 'Elemento', 'Indicador', 'Estado', 'Meta / Cantidad', 'Observación']);
+    p.infraestructura.forEach((it, i) => {
+      const item = s.items[i] || {};
+      rows.push([
+        i + 1, it.item, it.indicador || '—',
+        estadoLabel(item.estado || 'pendiente'),
+        item.meta || it.meta || '',
+        it.obs || ''
+      ]);
+    });
+    rows.push([]);
+  }
+
+  // Avance
+  const items = s.items;
+  const aplicable = items.filter(x => x.estado !== 'no-aplica').length || 1;
+  const comp = items.filter(x => x.estado === 'completado').length;
+  const enProc = items.filter(x => x.estado === 'en-proceso').length;
+  const sinInic = items.filter(x => x.estado === 'pendiente').length;
+  const noAp = items.filter(x => x.estado === 'no-aplica').length;
+  const pct = Math.round(((comp + enProc * 0.5) / aplicable) * 100);
+  rows.push(['RESUMEN DE AVANCE']);
+  rows.push(['Completados:', comp, 'En proceso:', enProc, 'Sin iniciar:', sinInic, 'No aplica:', noAp]);
+  rows.push(['% Avance:', pct + '%']);
+  rows.push([]);
+
+  // Observaciones diagnóstico
+  if (p.observaciones && p.observaciones.length > 0) {
+    rows.push(['OBSERVACIONES DEL DIAGNÓSTICO']);
+    p.observaciones.forEach((o, i) => rows.push([i + 1, o]));
+    rows.push([]);
+  }
+
+  // Bitácora
+  if (s.log && s.log.length > 0) {
+    rows.push(['BITÁCORA DE ACTIVIDADES']);
+    rows.push(['Fecha', 'Actividad registrada']);
+    s.log.forEach(e => rows.push([e.date, e.text]));
+    rows.push([]);
+  }
+
+  rows.push(['Generado:', new Date().toLocaleString('es-MX')]);
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:28},{wch:34},{wch:28},{wch:14},{wch:16},{wch:30}];
+  const sheetName = p.nombre.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]/g,'').substring(0, 28);
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+  const fileName = p.nombre.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]/g,'_').replace(/ +/g,'_');
+  XLSX.writeFile(wb, `Ficha_${fileName}_${getFechaHoy().replace(/\//g,'-')}.xlsx`);
+}
+
+// ================================================================
+// TABLET MODE TOGGLE
+// ================================================================
+function toggleTablet() {
+  const btn = document.getElementById('tablet-toggle');
+  const isTablet = document.body.classList.toggle('force-tablet');
+  btn.textContent = isTablet ? '🖥️' : '📱';
+  btn.classList.toggle('active', isTablet);
+  btn.title = isTablet ? 'Salir modo tablet' : 'Modo tablet';
+  // Refresh all maps after layout change
+  setTimeout(() => {
+    Object.values(maps_).forEach(m => m.map.invalidateSize());
+  }, 350);
+}
 
 
 document.getElementById('tab-general').onclick = function() { window.showTab('general', this); };
