@@ -1793,6 +1793,46 @@ window.addLog = function(pid) {
 };
 
 
+
+// ================================================================
+// INIT
+// ================================================================
+const _origShowTab = showTab;
+window.showTab = function(id, btn) {
+  _origShowTab(id, btn);
+  if (id !== 'general') {
+    const p = parques.find(x => x.id === id);
+    if (p) initMap(p);
+  }
+  const homeBtn = document.getElementById('home-btn');
+  if (homeBtn) homeBtn.style.display = (id === 'general') ? 'none' : 'inline-flex';
+};
+
+window.swLayer    = swLayer;
+window.filterTabs = filterTabs;
+window.showOk     = showOk;
+
+const _saveSeg          = saveSeg;
+const _updateItemEstado = updateItemEstado;
+const _saveItemMeta     = saveItemMeta;
+const _addLog           = addLog;
+
+window.saveSeg = function(pid) { _saveSeg(pid); saveToFirebase(pid); };
+window.updateItemEstado = function(pid, idx, sel) { _updateItemEstado(pid, idx, sel); saveToFirebase(pid); };
+window.saveItemMeta = function(pid, idx, val) {
+  _saveItemMeta(pid, idx, val);
+  clearTimeout(window._metaTimer);
+  window._metaTimer = setTimeout(() => saveToFirebase(pid), 1200);
+};
+window.addLog = function(pid) { _addLog(pid); saveToFirebase(pid); };
+
+document.getElementById('tab-general').onclick = function() {
+  window.showTab('general', this);
+};
+
+buildUI();
+loadFromFirebase();
+
 </script>
 
 <script>
