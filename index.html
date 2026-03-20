@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<!-- saved from url=(0062)file:///C:/Users/IMBIO/Downloads/parques_pabellon_arteaga.html -->
-<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="es">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema de Rehabilitación de Áreas Verdes — Pabellón de Arteaga 2024-2027</title>
+<title>Rehabilitación de Áreas Verdes — Pabellón de Arteaga 2024-2027</title>
 <style>
+
   :root {
     --verde: #2d7a3a;
     --verde-claro: #e8f5e9;
@@ -282,308 +283,220 @@
   .layer-btn.active, .layer-btn:hover { background: var(--verde); color: white; border-color: var(--verde); }
 
 /* ================================================================
-   MODO TABLET — Optimizado para pantallas de 11"+ (768px–1400px)
-   Touch targets ≥ 48px · Tipografía campo · Layout doble columna
+   RESPONSIVE SYSTEM — Mobile · Tablet · Desktop
+   Breakpoints: mobile <768px | tablet 768-1199px | desktop ≥1200px
 ================================================================ */
-@media (min-width: 768px) {
 
-  /* ── Base: fuente raíz más grande para legibilidad en campo ── */
-  html { font-size: 17px; }
+/* ── Variables ── */
+:root {
+  --sidebar-w: 280px;
+  --touch-min: 48px;
+  --font-field: 1rem;       /* 16px base */
+  --font-label: 0.82rem;
+  --font-small: 0.78rem;
+}
 
-  /* ── HEADER más compacto y legible ── */
-  header { padding: 12px 28px; gap: 16px; }
-  header h1 { font-size: 1.1rem; }
-  header p  { font-size: 0.82rem; }
-  .header-escudo { width: 48px; height: 48px; font-size: 22px; }
-
-  /* ── STATS: más grandes, fácil lectura rápida ── */
-  .resumen-global { margin: 16px 24px 0; padding: 16px 22px; }
-  .stat-card { padding: 14px 18px; min-width: 130px; }
-  .stat-card .num { font-size: 2rem; }
-  .stat-card .lbl { font-size: 0.82rem; }
-
-  /* ── BUSCADOR: touch target ≥ 48px ── */
-  .search-bar { margin: 14px 24px 0; }
-  .search-bar input {
-    padding: 13px 18px;
-    font-size: 1rem;
-    min-height: 48px;
-    border-radius: 10px;
+/* ── MOBILE default (ya existente, no se toca) ── */
+@media (max-width: 767px) {
+  .app-layout { display: block; }
+  .sidebar-label { display: none; }
+  .tabs-scroll { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 4px; }
+  .tab-btn {
+    flex-shrink: 0; padding: 8px 14px; border-radius: 8px 8px 0 0;
+    font-size: 0.78rem; white-space: nowrap;
   }
+  .panel-container { margin: 0 8px 20px; }
+}
 
-  /* ── TABS CONTAINER: sidebar vertical en tablet ── */
-  .tabs-container { margin: 0; padding: 0; border-bottom: none; }
+/* ── TABLET: 768px – 1199px ── */
+@media (min-width: 768px) and (max-width: 1199px) {
+  html { font-size: 16px; }
 
-  /* ── LAYOUT PRINCIPAL: sidebar + contenido ── */
+  /* Layout sidebar + content */
   .app-layout {
     display: grid;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: var(--sidebar-w) 1fr;
     gap: 0;
-    margin: 14px 24px 28px;
-    min-height: calc(100vh - 200px);
+    margin: 14px 16px 28px;
     align-items: start;
   }
 
-  /* ── SIDEBAR de navegación de parques ── */
-  .tabs-scroll {
-    flex-direction: column;
-    overflow-x: visible;
-    overflow-y: auto;
-    max-height: calc(100vh - 200px);
-    padding: 8px 0 8px 0;
-    gap: 3px;
+  /* Sidebar navigation */
+  .tabs-container {
+    position: sticky; top: 0;
+    max-height: calc(100vh - 120px);
+    overflow: hidden;
     background: #f0f7f0;
     border-radius: 12px 0 0 12px;
     border: 1.5px solid #c5ddc5;
     border-right: none;
+    display: flex; flex-direction: column;
   }
-  .tabs-scroll::-webkit-scrollbar { width: 5px; }
+  .tabs-scroll {
+    flex-direction: column !important;
+    overflow-x: visible !important;
+    overflow-y: auto;
+    flex: 1;
+    padding: 6px 0;
+    gap: 2px;
+  }
+  .tabs-scroll::-webkit-scrollbar { width: 4px; }
   .tabs-scroll::-webkit-scrollbar-thumb { background: #a5c8a5; border-radius: 4px; }
 
-  /* ── TAB BUTTONS: touch targets 48px+ ── */
+  /* Tab buttons — vertical, touch 52px */
   .tab-btn {
-    min-height: 52px;
-    padding: 12px 16px;
-    border-radius: 8px 0 0 8px !important;
+    min-height: 52px !important;
+    padding: 10px 14px !important;
+    border-radius: 0 !important;
     border: none !important;
     border-left: 4px solid transparent !important;
     text-align: left;
-    font-size: 0.88rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    font-size: 0.86rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     width: 100%;
     box-shadow: none !important;
     background: transparent !important;
-    color: #2d5a2d;
+    color: #2d5a2d !important;
+    white-space: normal !important;
+    line-height: 1.3;
     transform: none !important;
   }
-  .tab-btn:hover {
-    background: #dceedd !important;
-    border-left-color: #66bb6a !important;
-    color: #1b5e20;
-  }
-  .tab-btn.active {
-    background: white !important;
-    border-left-color: var(--verde) !important;
-    color: var(--verde);
-    font-weight: 800;
-    box-shadow: 2px 0 8px rgba(0,0,0,.08) !important;
-  }
-  .tab-btn .badge {
-    background: #e8f5e9;
-    color: #2e7d32;
-    border-radius: 20px;
-    padding: 2px 8px;
-    font-size: 0.72rem;
-    font-weight: 800;
-    flex-shrink: 0;
-  }
-  .tab-btn.active .badge {
-    background: rgba(26,110,46,.15);
-    color: var(--verde);
-  }
+  .tab-btn:hover  { background: #dceedd !important; border-left-color: #66bb6a !important; }
+  .tab-btn.active { background: white !important; border-left-color: var(--verde) !important;
+                    color: var(--verde) !important; font-weight: 800 !important;
+                    box-shadow: 2px 0 6px rgba(0,0,0,.08) !important; }
+  .tab-btn .badge { flex-shrink: 0; margin-left: 6px; background: #e8f5e9;
+                    color: #2e7d32; border-radius: 20px; padding: 2px 7px;
+                    font-size: 0.70rem; font-weight: 800; }
+  .tab-btn.active .badge { background: rgba(26,110,46,.15); color: var(--verde); }
 
-  /* ── PANEL CONTAINER: ocupa la columna derecha ── */
+  /* Panel content */
   .panel-container {
     margin: 0 !important;
-    border-radius: 0 12px 12px 0;
-    border: 1.5px solid #c5ddc5;
-    border-left: none;
+    border-radius: 0 12px 12px 0 !important;
+    border: 1.5px solid #c5ddc5 !important;
+    border-left: none !important;
     background: white;
     min-height: 600px;
   }
-  .panel.active {
-    border-radius: 0 12px 12px 0;
-  }
 
-  /* ── PARK HERO: más compacto y legible ── */
-  .park-hero { padding: 18px 24px; }
-  .park-hero h2 { font-size: 1.2rem; }
-
-  /* ── SECCIÓN DOBLE COLUMNA: mapa + tabla lado a lado ── */
-  .panel-two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-  }
-  .panel-two-col .section:first-child {
-    border-right: 1.5px solid #e8f0e8;
-  }
-
-  /* ── MAPA más alto en tablet ── */
-  .map-container { height: 320px; }
-  #overview-map  { height: 420px; }
-
-  /* ── TABLA DE INFRAESTRUCTURA ── */
-  .needs-table { font-size: 0.92rem; }
-  .needs-table th { font-size: 0.80rem; padding: 10px 12px; }
-  .needs-table td { padding: 10px 12px; }
-
-  /* ── SELECTORES DE ESTADO: touch targets grandes ── */
-  .estado-select {
-    min-height: 48px !important;
-    padding: 10px 12px !important;
-    font-size: 0.90rem !important;
-    border-radius: 8px !important;
-    font-weight: 600;
-    cursor: pointer;
-    min-width: 160px;
-  }
-  .estado-pendiente  { background: #fff8e1; color: #e65100; border-color: #ffcc02 !important; }
-  .estado-en-proceso { background: #e3f2fd; color: #0d47a1; border-color: #42a5f5 !important; }
-  .estado-completado { background: #e8f5e9; color: #1b5e20; border-color: #66bb6a !important; }
-  .estado-no-aplica  { background: #f5f5f5; color: #757575; border-color: #bdbdbd !important; }
-
-  /* ── BOTONES DE CAPA DEL MAPA: touch 48px ── */
-  .layer-btn {
-    min-height: 44px !important;
-    padding: 10px 16px !important;
-    font-size: 0.88rem !important;
-    border-radius: 8px !important;
-  }
-  .map-toolbar { gap: 8px; margin-bottom: 10px; }
-
-  /* ── SEGUIMIENTO: dos columnas ── */
-  .seguimiento-area {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 14px;
-  }
-
-  /* ── INPUTS Y SELECTS del seguimiento: touch 48px ── */
+  /* Touch targets */
+  .estado-select    { min-height: var(--touch-min) !important; padding: 10px 12px !important; font-size: 0.92rem !important; }
+  .layer-btn        { min-height: 44px !important; padding: 10px 16px !important; font-size: 0.88rem !important; }
+  .btn-save         { min-height: 52px !important; padding: 14px 26px !important; font-size: 1rem !important; }
+  .btn-download     { min-height: var(--touch-min) !important; padding: 11px 16px !important; font-size: 0.88rem !important; }
+  .add-log-row input  { min-height: var(--touch-min); padding: 11px 14px; font-size: 0.95rem; }
+  .add-log-row button { min-height: var(--touch-min); padding: 11px 18px; font-size: 0.92rem; }
   .seguimiento-field input,
   .seguimiento-field select,
-  .seguimiento-field textarea {
-    min-height: 48px !important;
-    padding: 11px 14px !important;
-    font-size: 0.95rem !important;
-    border-radius: 8px !important;
-  }
-  .seguimiento-field label {
-    font-size: 0.82rem !important;
-    margin-bottom: 5px;
-  }
+  .seguimiento-field textarea { min-height: var(--touch-min) !important; padding: 10px 13px !important; font-size: 0.95rem !important; }
 
-  /* ── BOTÓN GUARDAR: grande y visible ── */
-  .btn-save {
-    min-height: 52px !important;
-    padding: 14px 28px !important;
-    font-size: 1rem !important;
-    border-radius: 10px !important;
-    letter-spacing: .02em;
-  }
+  /* Seguimiento 2 columns */
+  .seguimiento-area { grid-template-columns: repeat(2, 1fr) !important; }
 
-  /* ── BOTONES DE DESCARGA ── */
-  .btn-download {
-    min-height: 48px !important;
-    padding: 12px 18px !important;
-    font-size: 0.88rem !important;
-    border-radius: 9px !important;
-  }
-  .download-bar { padding: 14px 20px; gap: 10px; }
+  /* Maps */
+  .map-container { height: 300px !important; }
+  #overview-map  { height: 400px !important; }
 
-  /* ── BITÁCORA: input más alto ── */
-  .add-log-row input {
-    min-height: 48px;
-    padding: 11px 14px;
-    font-size: 0.95rem;
-  }
-  .add-log-row button {
-    min-height: 48px;
-    padding: 11px 20px;
-    font-size: 0.92rem;
-    border-radius: 8px;
-    white-space: nowrap;
-  }
-  .log-list li { padding: 10px 0; font-size: 0.92rem; line-height: 1.5; }
-
-  /* ── OVERVIEW CARDS: más grandes para tapping ── */
-  .overview-item {
-    padding: 16px 18px;
-    min-height: 90px;
-    gap: 8px;
-  }
-  .overview-item h3 { font-size: 0.95rem; }
-  .overview-item .ov-estado { font-size: 0.80rem; padding: 4px 10px; }
-
-  /* ── SECTION TITLES ── */
+  /* Text sizes */
+  .needs-table { font-size: 0.92rem; }
+  .needs-table td, .needs-table th { padding: 10px 12px; }
   .section-title { font-size: 0.88rem; padding: 12px 20px; }
-  .section { padding-bottom: 4px; }
+  .overview-item { padding: 16px 18px; min-height: 88px; }
+  .overview-item h3 { font-size: 0.95rem; }
+  .stat-card .num { font-size: 1.9rem; }
+  .stat-card .lbl { font-size: 0.82rem; }
 
-  /* ── BARRA DE CAPAS DEL OVERVIEW MAP ── */
-  .leaflet-control-layers-toggle {
-    width: 40px !important;
-    height: 40px !important;
+  /* Hide tablet toggle in real tablet (auto-applies) */
+  #tablet-toggle { display: none; }
+}
+
+/* ── DESKTOP: ≥ 1200px ── */
+@media (min-width: 1200px) {
+  html { font-size: 15px; }
+
+  /* Full width layout — NO sidebar, tabs horizontal on top */
+  .app-layout {
+    display: block;
+    margin: 0;
+  }
+  .tabs-container {
+    margin: 12px 24px 0;
+    background: #d4e8d4;
+    padding: 10px 24px 0;
+    border-bottom: 3px solid var(--verde);
+    border-radius: 0;
+  }
+  .tabs-scroll {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    max-height: none !important;
+    padding-bottom: 4px !important;
+    gap: 5px !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  .tab-btn {
+    flex-shrink: 0 !important;
+    min-height: 40px !important;
+    padding: 8px 16px !important;
+    border-radius: 8px 8px 0 0 !important;
+    border: 2px solid #b2d4b2 !important;
+    border-bottom: 3px solid transparent !important;
+    border-left: 2px solid #b2d4b2 !important;
+    text-align: center !important;
+    font-size: 0.82rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    white-space: nowrap !important;
+    background: white !important;
+    color: var(--verde-oscuro) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08) !important;
+    transform: none;
+    line-height: 1;
+  }
+  .tab-btn:hover  { background: #c8e6c9 !important; color: var(--verde-oscuro) !important;
+                    border-color: var(--verde) !important; transform: translateY(-2px) !important; }
+  .tab-btn.active { background: var(--verde) !important; color: white !important;
+                    border-color: var(--verde) !important; transform: none !important;
+                    box-shadow: 0 3px 10px rgba(26,110,46,.35) !important; }
+  .tab-btn .badge { background: rgba(255,255,255,.3); color: inherit; }
+  .tab-btn:not(.active) .badge { background: #e8f5e9; color: var(--verde); }
+
+  .panel-container {
+    margin: 0 24px 28px !important;
+    border-radius: 0 12px 12px 12px !important;
+    border: none !important;
   }
 
-} /* end @media tablet */
+  /* Desktop: map + table side by side */
+  .desktop-two-col {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 0;
+    align-items: start;
+  }
+  .desktop-two-col .section:first-child { border-right: 1.5px solid #e8f0e8; }
 
-/* ── Toggle tablet mode button (visible always) ── */
-#tablet-toggle {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 9000;
-  background: #1565c0;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 52px;
-  height: 52px;
-  font-size: 22px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all .2s;
-}
-#tablet-toggle:hover { background: #0d47a1; transform: scale(1.1); }
-#tablet-toggle.active { background: #2e7d32; }
+  .map-container { height: 340px !important; }
+  #overview-map  { height: 440px !important; }
+  .needs-table { font-size: 0.88rem; }
+  .seguimiento-area { grid-template-columns: repeat(3, 1fr) !important; }
 
+  #tablet-toggle { display: none; }
+}
 
-/* Force tablet mode via JS toggle */
-body.force-tablet .app-layout {
-  display: grid !important;
-  grid-template-columns: 260px 1fr !important;
-  margin: 14px 24px 28px !important;
-}
-body.force-tablet .tabs-scroll {
-  flex-direction: column !important;
-  overflow-x: visible !important;
-  overflow-y: auto !important;
-  max-height: calc(100vh - 200px) !important;
-  background: #f0f7f0 !important;
-  border-radius: 12px 0 0 12px !important;
-  border: 1.5px solid #c5ddc5 !important;
-  border-right: none !important;
-  padding: 8px 0 !important;
-  gap: 3px !important;
-}
-body.force-tablet .tab-btn {
-  min-height: 52px !important; padding: 12px 16px !important;
-  border-radius: 8px 0 0 8px !important; border: none !important;
-  border-left: 4px solid transparent !important;
-  text-align: left !important; width: 100% !important;
-  display: flex !important; align-items: center !important;
-  justify-content: space-between !important;
-  background: transparent !important; box-shadow: none !important;
-  color: #2d5a2d !important; transform: none !important;
-  font-size: 0.88rem !important;
-}
-body.force-tablet .tab-btn:hover  { background: #dceedd !important; border-left-color: #66bb6a !important; }
-body.force-tablet .tab-btn.active { background: white !important; border-left-color: var(--verde) !important; font-weight: 800 !important; }
-body.force-tablet .panel-container { margin: 0 !important; border-radius: 0 12px 12px 0 !important; border: 1.5px solid #c5ddc5 !important; border-left: none !important; }
-body.force-tablet .estado-select   { min-height: 48px !important; padding: 10px 12px !important; font-size: 0.90rem !important; }
-body.force-tablet .layer-btn        { min-height: 44px !important; padding: 10px 16px !important; }
-body.force-tablet .btn-save         { min-height: 52px !important; padding: 14px 28px !important; font-size: 1rem !important; }
-body.force-tablet .seguimiento-area { grid-template-columns: repeat(2,1fr) !important; }
-body.force-tablet .map-container    { height: 320px !important; }
 </style>
 </head>
 <body>
 
-<button id="tablet-toggle" title="Modo tablet" onclick="toggleTablet()">📱</button>
+<button id="tablet-toggle" title="Info pantalla" onclick="toggleTablet()">📐</button>
 
 <header>
   <div class="header-escudo">🌿</div>
@@ -607,38 +520,37 @@ body.force-tablet .map-container    { height: 320px !important; }
 </div>
 
 <div class="app-layout">
-<div class="app-layout">
-<div class="tabs-container">
-  <div class="tabs-scroll" id="tabs-scroll">
-    <button class="tab-btn active" id="tab-general"><span><i class="fa-solid fa-map fa-fw" style="margin-right:6px"></i>General</span><span class="badge">27</span></button>
-  </div>
-</div>
 
-<div class="panel-container">
-  <div class="panel active" id="panel-general">
-    <div style="background:white;border-radius:0 12px 12px 12px;padding:20px 22px;box-shadow:var(--sombra);">
-      <div class="download-bar">
-        <span style="font-size:.82rem;color:var(--gris-oscuro);font-weight:600">📥 Descargar:</span>
-        <button class="btn-download verde" onclick="exportarResumenXLS()">📊 Resumen general (.xlsx)</button>
-        <button class="btn-download" onclick="exportarTodosXLS()">📋 Todos los parques (.xlsx)</button>
-      </div>
-      <div class="download-bar">
-        <span style="font-size:.82rem;font-weight:600;color:#2e7d32">📥 Descargar:</span>
-        <button class="btn-download verde" onclick="exportarResumenXLS()">📊 Resumen general (.xlsx)</button>
-        <button class="btn-download" onclick="exportarTodosXLS()">📋 Todos los parques (.xlsx)</button>
-      </div>
-      <p style="color:var(--gris-oscuro);font-size:0.88rem;margin-bottom:16px;">Vista general. Haz clic en un marcador o pestaña para ver la ficha completa de cada área verde.</p>
-      <div id="overview-map"></div>
-      <div class="overview-grid" id="overview-grid"></div>
+  <div class="tabs-container">
+    <div class="tabs-scroll" id="tabs-scroll">
+      <button class="tab-btn active" id="tab-general">
+        <span><i class="fa-solid fa-map fa-fw" style="margin-right:6px;opacity:.8"></i>General</span>
+        <span class="badge">27</span>
+      </button>
     </div>
   </div>
-</div>
+
+  <div class="panel-container">
+    <div class="panel active" id="panel-general">
+      <div style="background:white;border-radius:0 12px 12px 12px;padding:20px 22px;box-shadow:var(--sombra);">
+        <div class="download-bar">
+          <span style="font-size:.82rem;font-weight:600;color:#2e7d32">📥 Descargar:</span>
+          <button class="btn-download verde" onclick="exportarResumenXLS()">📊 Resumen general (.xlsx)</button>
+          <button class="btn-download" onclick="exportarTodosXLS()">📋 Todos los parques (.xlsx)</button>
+        </div>
+        <p style="color:var(--gris-oscuro);font-size:0.88rem;margin-bottom:16px;">Vista general. Haz clic en un marcador o pestaña para ver la ficha completa de cada área verde.</p>
+        <div id="overview-map"></div>
+        <div class="overview-grid" id="overview-grid"></div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /.app-layout -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
@@ -1392,9 +1304,18 @@ function mkIcon(label) {
 }
 
 function initMap(p) {
-  if (maps_[p.id]) { setTimeout(() => maps_[p.id].map.invalidateSize(), 100); return; }
+  // If already initialized, just refresh size
+  if (maps_[p.id]) {
+    [100, 300, 700].forEach(t => setTimeout(() => maps_[p.id].map.invalidateSize(), t));
+    return;
+  }
   const el = document.getElementById('map-' + p.id);
   if (!el) return;
+  // Ensure container has dimensions before init
+  if (el.offsetWidth === 0 || el.offsetHeight === 0) {
+    setTimeout(() => initMap(p), 200);
+    return;
+  }
   const map = L.map('map-' + p.id, { zoomControl: true, scrollWheelZoom: false }).setView([p.lat, p.lng], 16);
   const osmL  = L.tileLayer(TL.osm.url,  { attribution: TL.osm.attr,  maxZoom: TL.osm.maxZoom  }).addTo(map);
   const satL  = L.tileLayer(TL.sat.url,  { attribution: TL.sat.attr,  maxZoom: TL.sat.maxZoom  });
@@ -1405,8 +1326,7 @@ function initMap(p) {
       '<small>' + p.infraestructura.length + ' elementos · ' +
       '<a href="' + p.mapsUrl + '" target="_blank" style="color:#1a6e2e">Google Maps ↗</a></small>');
   maps_[p.id] = { map, layers: { osm: osmL, sat: satL, topo: topoL }, current: 'osm' };
-  setTimeout(() => map.invalidateSize(), 200);
-  setTimeout(() => map.invalidateSize(), 600);
+  [150, 400, 900].forEach(t => setTimeout(() => map.invalidateSize(), t));
 }
 
 function swLayer(pid, key) {
@@ -1630,7 +1550,7 @@ window.showTab = function(id, btn) {
   _origShowTab(id, btn);
   if (id !== 'general') {
     const p = parques.find(x => x.id === id);
-    if (p) setTimeout(() => initMap(p), 150);
+    if (p) { setTimeout(() => initMap(p), 100); setTimeout(() => initMap(p), 400); }
   }
 };
 
@@ -1976,19 +1896,14 @@ function exportarParqueXLS(pid) {
   XLSX.writeFile(wb, `Ficha_${fileName}_${getFechaHoy().replace(/\//g,'-')}.xlsx`);
 }
 
-// ================================================================
-// TABLET MODE TOGGLE
-// ================================================================
+// Detect screen size and show info
 function toggleTablet() {
+  const w = window.innerWidth;
+  const mode = w < 768 ? 'Móvil' : w < 1200 ? 'Tablet' : 'Escritorio';
   const btn = document.getElementById('tablet-toggle');
-  const isTablet = document.body.classList.toggle('force-tablet');
-  btn.textContent = isTablet ? '🖥️' : '📱';
-  btn.classList.toggle('active', isTablet);
-  btn.title = isTablet ? 'Salir modo tablet' : 'Modo tablet';
-  // Refresh all maps after layout change
-  setTimeout(() => {
-    Object.values(maps_).forEach(m => m.map.invalidateSize());
-  }, 350);
+  btn.title = 'Pantalla: ' + w + 'px (' + mode + ')';
+  // Refresh all maps
+  setTimeout(() => { Object.values(maps_).forEach(m => m.map.invalidateSize()); }, 300);
 }
 
 
