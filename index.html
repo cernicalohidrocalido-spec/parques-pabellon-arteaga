@@ -1827,12 +1827,6 @@ document.getElementById('tab-general').onclick = function() {
   window.showTab('general', this);
 };
 
-// Ensure home button starts hidden (on General tab at load)
-(function() {
-  const btn = document.getElementById('home-btn');
-  if (btn) btn.classList.remove('visible');
-})();
-
 // Bootstrap
 buildUI();
 loadFromFirebase();
