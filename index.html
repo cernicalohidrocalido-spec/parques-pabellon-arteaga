@@ -90,6 +90,11 @@
   .panel-container { margin: 0 20px 28px; }
   .panel { display: none; }
   .panel.active { display: block; }
+  .panel.active .map-container,
+  .panel.active .map-container > div {
+    display: block !important;
+    visibility: visible !important;
+  }
 
   .park-card {
     background: white; border-radius: 0 12px 12px 12px;
@@ -275,8 +280,8 @@
 
   /* ── LEAFLET MAPS ── */
   #overview-map { height: 360px; border-radius: 12px; overflow: hidden; box-shadow: var(--sombra); margin-bottom: 16px; }
-  .map-container { height: 260px; border-radius: 10px; overflow: hidden; margin: 6px 0 14px; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
-  .map-container > div { min-height: 260px; }
+  .map-container { height: 260px; border-radius: 10px; overflow: hidden; margin: 6px 0 14px; box-shadow: 0 2px 10px rgba(0,0,0,.12); position: relative; }
+  .map-container > div { height: 100%; min-height: 260px; width: 100%; }
   .map-toolbar { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
   .map-toolbar span { font-size: .75rem; font-weight: 600; color: var(--verde-oscuro); }
   .layer-btn { padding: 4px 10px; border: 1.5px solid var(--borde); border-radius: 6px; background: white; font-size: .72rem; cursor: pointer; font-weight: 500; transition: all .15s; }
@@ -1398,7 +1403,7 @@ function mkIcon(label) {
 }
 
 function initMap(p) {
-  // Already initialized — just refresh size
+  // Already initialized — refresh tiles
   if (maps_[p.id]) {
     setTimeout(() => maps_[p.id].map.invalidateSize(), 50);
     setTimeout(() => maps_[p.id].map.invalidateSize(), 400);
@@ -1408,40 +1413,50 @@ function initMap(p) {
   const el = document.getElementById('map-' + p.id);
   if (!el) return;
 
-  // Wait until panel is visible (offsetWidth > 0 means display:block is applied)
-  let attempts = 0;
-  function tryCreate() {
-    attempts++;
-    if (el.offsetWidth > 0 && el.offsetHeight > 0) {
-      // Container is visible — safe to init Leaflet
-      const map = L.map(el, { zoomControl: true, scrollWheelZoom: false })
-                   .setView([p.lat, p.lng], 16);
+  function doCreate() {
+    void el.offsetWidth; // force reflow so Leaflet reads real dimensions
 
-      const osmL  = L.tileLayer(TL.osm.url,  { attribution: TL.osm.attr,  maxZoom: TL.osm.maxZoom  }).addTo(map);
-      const satL  = L.tileLayer(TL.sat.url,  { attribution: TL.sat.attr,  maxZoom: TL.sat.maxZoom  });
-      const topoL = L.tileLayer(TL.topo.url, { attribution: TL.topo.attr, maxZoom: TL.topo.maxZoom });
+    const osmL  = L.tileLayer(TL.osm.url,  { attribution: TL.osm.attr,  maxZoom: TL.osm.maxZoom });
+    const satL  = L.tileLayer(TL.sat.url,  { attribution: TL.sat.attr,  maxZoom: TL.sat.maxZoom });
+    const topoL = L.tileLayer(TL.topo.url, { attribution: TL.topo.attr, maxZoom: TL.topo.maxZoom });
 
-      const markerIdx = parques.findIndex(x => x.id === p.id) + 1;
-      L.marker([p.lat, p.lng], { icon: mkIcon(markerIdx) }).addTo(map)
-        .bindPopup(
-          '<strong style="color:#1a6e2e">' + p.nombre + '</strong><br>' +
-          '<small>' + p.infraestructura.length + ' elementos</small><br>' +
-          '<a href="' + p.mapsUrl + '" target="_blank" style="color:#1a6e2e;font-size:.8rem">📍 Google Maps ↗</a>'
-        );
+    const map = L.map(el, { zoomControl: true, scrollWheelZoom: false })
+                 .setView([p.lat, p.lng], 16);
+    osmL.addTo(map);
 
-      maps_[p.id] = { map, layers: { osm: osmL, sat: satL, topo: topoL }, current: 'osm' };
+    const idx = parques.findIndex(x => x.id === p.id) + 1;
+    L.marker([p.lat, p.lng], { icon: mkIcon(idx) }).addTo(map)
+      .bindPopup(
+        '<strong style="color:#1a6e2e">' + p.nombre + '</strong><br>' +
+        '<small>' + p.infraestructura.length + ' elementos · ' +
+        '<a href="' + p.mapsUrl + '" target="_blank" style="color:#1a6e2e">📍 Google Maps ↗</a></small>'
+      );
 
-      // Ensure tiles render correctly after CSS transitions
-      setTimeout(() => map.invalidateSize(), 100);
-      setTimeout(() => map.invalidateSize(), 600);
+    maps_[p.id] = { map, layers: { osm: osmL, sat: satL, topo: topoL }, current: 'osm' };
 
-    } else if (attempts < 60) {
-      // Retry up to 60 frames (~1 second)
-      requestAnimationFrame(tryCreate);
-    }
+    setTimeout(() => map.invalidateSize(), 100);
+    setTimeout(() => map.invalidateSize(), 600);
   }
 
-  requestAnimationFrame(tryCreate);
+  // With double-RAF from showTab, panel should be visible now
+  // Try immediately, then retry if still hidden
+  function waitForVisible() {
+    void el.offsetWidth; // force layout recalc
+    if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+      doCreate();
+    } else {
+      // Panel not visible yet — retry in 50ms increments up to 10 times
+      let retries = 0;
+      const retry = setInterval(() => {
+        void el.offsetWidth;
+        if (el.offsetWidth > 0 || ++retries >= 10) {
+          clearInterval(retry);
+          doCreate();
+        }
+      }, 50);
+    }
+  }
+  requestAnimationFrame(waitForVisible);
 }
 
 function swLayer(pid, key) {
@@ -1787,12 +1802,15 @@ const _origShowTab      = showTab;
 // showTab: switch panel + init map + toggle home button
 window.showTab = function(id, btn) {
   _origShowTab(id, btn);
-  if (id !== 'general') {
-    const p = parques.find(x => x.id === id);
-    if (p) initMap(p);
-  }
   const homeBtn = document.getElementById('home-btn');
   if (homeBtn) homeBtn.style.display = (id === 'general') ? 'none' : 'flex';
+  if (id !== 'general') {
+    const p = parques.find(x => x.id === id);
+    if (p) {
+      // Dar al browser 2 frames para aplicar display:block antes de que Leaflet lea dimensiones
+      requestAnimationFrame(() => requestAnimationFrame(() => initMap(p)));
+    }
+  }
 };
 
 // Expose map/filter globals
