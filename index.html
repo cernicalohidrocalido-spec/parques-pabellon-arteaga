@@ -1574,15 +1574,15 @@ function buildParkPanel(p, num) {
   return `
     <div class="park-hero">
       <div>
-        <h2 style="font-size:1.1rem;font-weight:700;color:var(--verde-oscuro)">🌳 ${p.nombre}</h2>
-        <a href="${p.mapsUrl}" target="_blank" style="font-size:.78rem;color:rgba(255,255,255,0.85)">📍 Ver en Google Maps ↗</a>
+        <h2 style="font-size:1.15rem;font-weight:800;color:#ffffff;text-shadow:0 1px 4px rgba(0,0,0,0.5)">🌳 ${p.nombre}</h2>
+        <a href="${p.mapsUrl}" target="_blank" style="font-size:.78rem;color:rgba(255,255,255,0.9);text-decoration:underline">📍 Ver en Google Maps ↗</a>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-        <span style="font-size:.78rem;color:rgba(255,255,255,0.75)">Avance:</span>
+        <span style="font-size:.78rem;color:rgba(255,255,255,0.85);font-weight:600">Avance:</span>
         <div style="flex:1;height:8px;background:#e8f0e8;border-radius:4px;overflow:hidden">
           <div id="bar-${id}" style="width:0%;height:100%;background:linear-gradient(90deg,#56c169,#1a6e2e);border-radius:4px;transition:width .4s"></div>
         </div>
-        <span id="pct-${id}" style="font-size:.78rem;font-weight:700;color:var(--verde-oscuro);min-width:32px">0%</span>
+        <span id="pct-${id}" style="font-size:.78rem;font-weight:800;color:#ffffff;min-width:32px">0%</span>
       </div>
     </div>
 
