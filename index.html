@@ -306,8 +306,11 @@
 
 /* ── MOBILE default (ya existente, no se toca) ── */
 /* ── MOBILE DRAWER NAVIGATION ── */
-/* Botón hamburguesa para abrir el drawer en móvil */
+/* Botón hamburguesa — oculto por defecto, JS lo muestra */
 #mobile-menu-btn {
+  display: none;
+}
+#mobile-nav-bar {
   display: none;
 }
 
@@ -2228,65 +2231,116 @@ function exportarParqueXLS(pid) {
 <script>
 // ================================================================
 // DRAWER MÓVIL — Navegación por menú lateral en pantallas pequeñas
+// Usa JS para manejar el modo móvil independientemente de CSS media queries
 // ================================================================
 (function() {
   var isDrawerInit = false;
+  var modoMobile = false;
 
   function esMobile() {
-    return window.innerWidth <= 767;
+    // Detectar por ancho real del viewport
+    return window.innerWidth < 768 || (window.screen.width < 768 && window.devicePixelRatio >= 1);
+  }
+
+  function aplicarModoMobile(mobile) {
+    modoMobile = mobile;
+    var navBar     = document.getElementById('mobile-nav-bar');
+    var tabsCont   = document.querySelector('.tabs-container');
+    var appLayout  = document.querySelector('.app-layout');
+    var panelCont  = document.querySelector('.panel-container');
+
+    if (mobile) {
+      // Mostrar barra de nav móvil
+      if (navBar) navBar.style.display = 'flex';
+      // Ocultar tabs container original con display:none via style (más fuerte que CSS)
+      if (tabsCont) {
+        tabsCont.style.setProperty('display', 'none', 'important');
+      }
+      // Forzar layout de bloque (sin grid)
+      if (appLayout) {
+        appLayout.style.setProperty('display', 'block', 'important');
+        appLayout.style.setProperty('grid-template-columns', 'none', 'important');
+        appLayout.style.setProperty('margin', '0', 'important');
+      }
+      if (panelCont) {
+        panelCont.style.setProperty('margin', '0 8px 100px', 'important');
+        panelCont.style.setProperty('border', 'none', 'important');
+        panelCont.style.setProperty('border-radius', '0', 'important');
+        panelCont.style.setProperty('min-height', 'auto', 'important');
+      }
+      sincronizarTitulo();
+    } else {
+      // Restaurar para desktop/tablet
+      if (navBar) navBar.style.display = 'none';
+      if (tabsCont) tabsCont.style.removeProperty('display');
+      if (appLayout) {
+        appLayout.style.removeProperty('display');
+        appLayout.style.removeProperty('grid-template-columns');
+        appLayout.style.removeProperty('margin');
+      }
+      if (panelCont) {
+        panelCont.style.removeProperty('margin');
+        panelCont.style.removeProperty('border');
+        panelCont.style.removeProperty('border-radius');
+        panelCont.style.removeProperty('min-height');
+      }
+    }
+  }
+
+  function sincronizarTitulo() {
+    var titleEl = document.getElementById('mobile-nav-title');
+    if (!titleEl) return;
+    var activeBtn = document.querySelector('.tabs-scroll .tab-btn.active');
+    if (!activeBtn) return;
+    // Intentar extraer el texto limpio (sin el número del badge)
+    var clone = activeBtn.cloneNode(true);
+    var badge = clone.querySelector('.badge');
+    if (badge) badge.remove();
+    var txt = clone.textContent.trim();
+    if (txt) titleEl.textContent = txt;
   }
 
   function inicializarDrawer() {
     if (isDrawerInit) return;
     var container = document.getElementById('drawer-tabs-container');
     if (!container) return;
-    var tabsScroll = document.querySelector('.tabs-scroll');
+    var tabsScroll = document.querySelector('#tabs-scroll');
     if (!tabsScroll) return;
-    var clone = tabsScroll.cloneNode(true);
-    clone.querySelectorAll('[id]').forEach(function(el) { el.removeAttribute('id'); });
+
     var allOrigBtns = Array.from(tabsScroll.querySelectorAll('.tab-btn'));
-    var clonedBtns = Array.from(clone.querySelectorAll('.tab-btn'));
-    clonedBtns.forEach(function(btn, idx) {
-      var origBtn = allOrigBtns[idx];
+
+    // Crear lista de botones en el drawer
+    allOrigBtns.forEach(function(origBtn) {
+      var btn = document.createElement('button');
+      btn.className = 'tab-btn' + (origBtn.classList.contains('active') ? ' active' : '');
+      // Copiar contenido HTML
+      btn.innerHTML = origBtn.innerHTML;
       btn.addEventListener('click', function() {
-        if (origBtn) origBtn.click();
+        origBtn.click();
         cerrarDrawer();
+        sincronizarTitulo();
       });
+      container.appendChild(btn);
     });
-    container.appendChild(clone);
+
     isDrawerInit = true;
   }
 
-  function sincronizarDrawer() {
-    var tabsScroll = document.querySelector('.tabs-scroll');
-    var drawerContainer = document.getElementById('drawer-tabs-container');
-    if (!tabsScroll || !drawerContainer) return;
-    var origBtns = tabsScroll.querySelectorAll('.tab-btn');
-    var drawerBtns = drawerContainer.querySelectorAll('.tab-btn');
+  function sincronizarDrawerActivo() {
+    var container = document.getElementById('drawer-tabs-container');
+    if (!container) return;
+    var origBtns   = Array.from(document.querySelectorAll('#tabs-scroll .tab-btn'));
+    var drawerBtns = Array.from(container.querySelectorAll('.tab-btn'));
     origBtns.forEach(function(orig, i) {
       if (!drawerBtns[i]) return;
-      if (orig.classList.contains('active')) {
-        drawerBtns[i].classList.add('active');
-        var titleEl = document.getElementById('mobile-nav-title');
-        if (titleEl) {
-          var labelSpan = orig.querySelector('.sidebar-label');
-          var txt = labelSpan ? labelSpan.textContent.trim() : '';
-          if (!txt) {
-            var nodes = Array.from(orig.childNodes);
-            var textNodes = nodes.filter(function(n) { return n.nodeType === 3 && n.textContent.trim(); });
-            txt = textNodes.length ? textNodes[0].textContent.trim() : orig.textContent.replace(/\d+/g,'').trim();
-          }
-          if (txt) titleEl.textContent = txt;
-        }
-      } else {
-        drawerBtns[i].classList.remove('active');
-      }
+      drawerBtns[i].classList.toggle('active', orig.classList.contains('active'));
     });
+    sincronizarTitulo();
   }
 
   window.abrirDrawer = function() {
     inicializarDrawer();
-    sincronizarDrawer();
+    sincronizarDrawerActivo();
     document.getElementById('mobile-drawer').classList.add('open');
     document.getElementById('drawer-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -2300,26 +2354,58 @@ function exportarParqueXLS(pid) {
     document.body.style.overflow = '';
   };
 
-  function observarCambios() {
-    var tabsScroll = document.querySelector('.tabs-scroll');
-    if (!tabsScroll) return;
-    var observer = new MutationObserver(function() {
-      if (esMobile()) sincronizarDrawer();
-    });
-    observer.observe(tabsScroll, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  // Exponer para que showTab la llame
+  window.sincronizarDrawer = sincronizarDrawerActivo;
+
+  function onResize() {
+    var ahora = esMobile();
+    if (ahora !== modoMobile) aplicarModoMobile(ahora);
   }
 
   function init() {
-    observarCambios();
-    setTimeout(function() {
-      if (esMobile()) sincronizarDrawer();
-    }, 800);
+    aplicarModoMobile(esMobile());
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('orientationchange', function() {
+      setTimeout(onResize, 300);
+    });
+    // Observer para sincronizar título cuando cambie la pestaña activa
+    var tabsScroll = document.querySelector('#tabs-scroll');
+    if (tabsScroll) {
+      var obs = new MutationObserver(function() {
+        if (modoMobile) {
+          sincronizarTitulo();
+          sincronizarDrawerActivo();
+        }
+      });
+      obs.observe(tabsScroll, { attributes: true, subtree: true, attributeFilter: ['class'] });
+    }
+  }
+
+  // Esperar a que buildUI() haya corrido (agrega las pestañas dinámicamente)
+  // La función buildUI se llama al final del script principal — interceptamos
+  var _origBuildUI = window.buildUI;
+  var buildUIIntercepted = false;
+  function tryIntercept() {
+    if (!buildUIIntercepted && typeof window.buildUI === 'function' && window.buildUI !== interceptedBuildUI) {
+      _origBuildUI = window.buildUI;
+      window.buildUI = interceptedBuildUI;
+      buildUIIntercepted = true;
+    }
+  }
+  function interceptedBuildUI() {
+    _origBuildUI.apply(this, arguments);
+    // Después de buildUI, reiniciar el drawer
+    isDrawerInit = false;
+    aplicarModoMobile(esMobile());
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', function() {
+      // Intentar interceptar antes de que se ejecute buildUI
+      setTimeout(init, 100);
+    });
   } else {
-    setTimeout(init, 0);
+    setTimeout(init, 100);
   }
 
   document.addEventListener('keydown', function(e) {
