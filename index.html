@@ -305,181 +305,141 @@
 }
 
 /* ── MOBILE default (ya existente, no se toca) ── */
-/* ── MOBILE DRAWER NAVIGATION ── */
-/* Botón hamburguesa — oculto por defecto, JS lo muestra */
-#mobile-menu-btn {
-  display: none;
-}
-#mobile-nav-bar {
-  display: none;
-}
+/* ── ELEMENTOS SOLO MÓVIL — ocultos por defecto ── */
+#mobile-menu-btn { display: none; }
+#mobile-nav-bar  { display: none; }
+#drawer-overlay  { display: none; }
+#mobile-drawer   { display: none; }
 
+/* ── MÓVIL: ≤767px — pestañas horizontales con scroll ── */
 @media (max-width: 767px) {
-  /* Ensure map containers have explicit height on mobile */
+  /* Mapas */
   .map-container,
   .map-container > div,
   .leaflet-container {
-    height: 240px !important;
-    min-height: 240px !important;
+    height: 220px !important;
+    min-height: 220px !important;
     width: 100% !important;
   }
   #overview-map,
   #overview-map.leaflet-container {
-    height: 280px !important;
-    min-height: 280px !important;
+    height: 260px !important;
+    min-height: 260px !important;
   }
 
-  /* Barra de navegación móvil fija en la parte superior */
-  #mobile-nav-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(135deg, #0d2444 0%, #1a3a6b 100%);
-    color: white;
-    padding: 10px 14px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  }
-  #mobile-nav-bar .nav-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin: 0 10px;
-  }
-  #mobile-menu-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border: none;
-    background: rgba(255,255,255,0.15);
-    border-radius: 8px;
-    color: white;
-    font-size: 22px;
-    cursor: pointer;
-    flex-shrink: 0;
-    -webkit-tap-highlight-color: transparent;
-  }
-  #mobile-menu-btn:active { background: rgba(255,255,255,0.3); }
-
-  /* Overlay oscuro cuando el drawer está abierto */
-  #drawer-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1100;
-  }
-  #drawer-overlay.open { display: block; }
-
-  /* Drawer lateral */
-  #mobile-drawer {
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 80%;
-    max-width: 320px;
-    height: 100%;
-    background: #eef2f9;
-    z-index: 1200;
-    overflow-y: auto;
-    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 4px 0 20px rgba(0,0,0,0.3);
-  }
-  #mobile-drawer.open { left: 0; }
-
-  /* Cabecera del drawer */
-  .drawer-header {
-    background: linear-gradient(135deg, #0d2444 0%, #1a3a6b 100%);
-    color: white;
-    padding: 16px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .drawer-header h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin: 0;
-  }
-  #drawer-close {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: rgba(255,255,255,0.2);
-    border-radius: 6px;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Lista de pestañas dentro del drawer */
-  #mobile-drawer .tabs-scroll {
-    flex-direction: column !important;
-    overflow-x: visible !important;
-    overflow-y: visible !important;
-    padding: 8px 0;
-    gap: 2px;
-    background: transparent;
-  }
-  #mobile-drawer .tab-btn {
-    min-height: 52px !important;
-    padding: 12px 16px !important;
-    border-radius: 0 !important;
-    border: none !important;
-    border-left: 4px solid transparent !important;
-    text-align: left !important;
-    font-size: 0.88rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    width: 100% !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    color: #1a3a6b !important;
-    white-space: normal !important;
-    line-height: 1.3;
-    transform: none !important;
-  }
-  #mobile-drawer .tab-btn:active { background: #dce6f5 !important; }
-  #mobile-drawer .tab-btn.active {
-    background: white !important;
-    border-left-color: #1a3a6b !important;
-    color: #1a3a6b !important;
-    font-weight: 800 !important;
-  }
-  #mobile-drawer .tab-btn .badge {
-    flex-shrink: 0;
-    margin-left: 8px;
-    background: #e8f5e9;
-    color: #2e7d32;
-    border-radius: 20px;
-    padding: 2px 8px;
-    font-size: 0.72rem;
-    font-weight: 800;
-  }
-  #mobile-drawer .tab-btn.active .badge {
-    background: rgba(26,58,107,0.15);
-    color: #1a3a6b;
-  }
-
-  /* Ocultar la barra de tabs original en móvil */
-  .tabs-container { display: none !important; }
-
-  /* Panel: sin márgenes extra */
-  .app-layout { display: block; }
+  /* Layout: bloque simple */
+  .app-layout { display: block !important; grid-template-columns: none !important; margin: 0 !important; }
   .sidebar-label { display: none; }
-  .panel-container { margin: 0 8px 100px; }
+
+  /* ── BARRA DE PESTAÑAS MÓVIL ──
+     Sticky debajo del header, scroll horizontal, botones táctiles */
+  .tabs-container {
+    display: block !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 500 !important;
+    background: #1a3a6b !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-bottom: none !important;
+    border-radius: 0 !important;
+  }
+  .tabs-scroll {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    gap: 0 !important;
+    padding: 6px 8px !important;
+    max-height: none !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  .tabs-scroll::-webkit-scrollbar { height: 3px; }
+  .tabs-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 3px; }
+
+  /* Botones de pestaña en móvil — compactos y táctiles */
+  .tab-btn {
+    flex-shrink: 0 !important;
+    scroll-snap-align: start !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 0 12px !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    border-bottom: 3px solid transparent !important;
+    background: rgba(255,255,255,0.08) !important;
+    color: rgba(255,255,255,0.85) !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    cursor: pointer !important;
+    margin-right: 5px !important;
+    box-shadow: none !important;
+    transform: none !important;
+    line-height: 1 !important;
+    width: auto !important;
+    text-align: center !important;
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+    transition: background 0.15s, border-color 0.15s !important;
+  }
+  .tab-btn:active {
+    background: rgba(255,255,255,0.25) !important;
+  }
+  .tab-btn.active {
+    background: white !important;
+    color: #1a3a6b !important;
+    border-color: white !important;
+    border-bottom-color: #f9a825 !important;
+    font-weight: 800 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+  }
+  .tab-btn .badge {
+    background: rgba(255,255,255,0.2) !important;
+    color: rgba(255,255,255,0.9) !important;
+    border-radius: 10px !important;
+    padding: 1px 6px !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    margin-left: 2px !important;
+  }
+  .tab-btn.active .badge {
+    background: #f9a825 !important;
+    color: #1a3a6b !important;
+  }
+
+  /* Panel */
+  .panel-container {
+    margin: 8px 6px 100px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    min-height: auto !important;
+    background: transparent !important;
+  }
+
+  /* Scroll automático a la pestaña activa */
+  .tab-btn.active {
+    scroll-margin-left: 8px;
+  }
+
+  /* Tabla de necesidades más compacta */
+  .needs-table { font-size: 0.74rem; }
+  .needs-table td, .needs-table th { padding: 6px 8px; }
+
+  /* Seguimiento 1 columna */
+  .seguimiento-area { grid-template-columns: 1fr !important; }
+
+  /* Secciones con menos padding */
+  .section { padding: 10px 12px; }
+  .park-hero { flex-direction: column; }
 }
 
 /* ── TABLET: 768px – 1199px ── */
@@ -673,24 +633,6 @@
 <body>
 
 <button id="tablet-toggle" title="Info pantalla" onclick="toggleTablet()">📐</button>
-
-<!-- BARRA DE NAVEGACIÓN MÓVIL -->
-<div id="mobile-nav-bar">
-  <button id="mobile-menu-btn" aria-label="Abrir menú de parques" onclick="abrirDrawer()">☰</button>
-  <span class="nav-title" id="mobile-nav-title">📊 Resumen General</span>
-</div>
-
-<!-- OVERLAY -->
-<div id="drawer-overlay" onclick="cerrarDrawer()"></div>
-
-<!-- DRAWER LATERAL -->
-<div id="mobile-drawer">
-  <div class="drawer-header">
-    <h3>📍 Áreas Verdes</h3>
-    <button id="drawer-close" onclick="cerrarDrawer()" aria-label="Cerrar menú">✕</button>
-  </div>
-  <div id="drawer-tabs-container"></div>
-</div>
 
 <!-- Botón flotante Inicio — siempre visible en esquina inferior derecha -->
 <header>
@@ -1931,33 +1873,20 @@ const _saveItemMeta     = saveItemMeta;
 const _addLog           = addLog;
 const _origShowTab      = showTab;
 
-// showTab: switch panel + init map + toggle home button
+// showTab: switch panel + init map + scroll active tab into view
 window.showTab = function(id, btn) {
   _origShowTab(id, btn);
   if (id !== 'general') {
     const p = parques.find(x => x.id === id);
     if (p) {
-      // Dar al browser 2 frames para aplicar display:block antes de que Leaflet lea dimensiones
       requestAnimationFrame(() => requestAnimationFrame(() => initMap(p)));
     }
   }
-  // Actualizar título en barra móvil
-  const titleEl = document.getElementById('mobile-nav-title');
-  if (titleEl) {
-    const activBtn = document.querySelector('.tabs-scroll .tab-btn.active');
-    if (activBtn) {
-      const labelSpan = activBtn.querySelector('.sidebar-label');
-      let txt = labelSpan ? labelSpan.textContent.trim() : '';
-      if (!txt) {
-        const nodes = Array.from(activBtn.childNodes);
-        const textNodes = nodes.filter(n => n.nodeType === 3 && n.textContent.trim());
-        txt = textNodes.length ? textNodes[0].textContent.trim() : activBtn.textContent.replace(/\d+/g,'').trim();
-      }
-      if (txt) titleEl.textContent = txt;
-    }
+  // En móvil, hacer scroll para que la pestaña activa sea visible
+  const activeBtn = document.querySelector('.tabs-scroll .tab-btn.active');
+  if (activeBtn && activeBtn.scrollIntoView) {
+    setTimeout(() => activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' }), 50);
   }
-  // Sincronizar clases active en el drawer si está iniciado
-  if (typeof sincronizarDrawer === 'function') sincronizarDrawer();
 };
 
 // Expose map/filter globals
@@ -1993,6 +1922,14 @@ window.state   = state;
 // Bootstrap
 buildUI();
 loadFromFirebase();
+
+// En móvil, hacer scroll de la pestaña activa al inicio
+setTimeout(function() {
+  var activeBtn = document.querySelector('.tabs-scroll .tab-btn.active');
+  if (activeBtn) {
+    activeBtn.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
+  }
+}, 600);
 
 // Actualizar window.state después de cargar Firebase (los datos llegan async)
 const _origLoadFromFirebase = loadFromFirebase;
@@ -2228,191 +2165,6 @@ function exportarParqueXLS(pid) {
 }
 </script>
 
-<script>
-// ================================================================
-// DRAWER MÓVIL — Navegación por menú lateral en pantallas pequeñas
-// Usa JS para manejar el modo móvil independientemente de CSS media queries
-// ================================================================
-(function() {
-  var isDrawerInit = false;
-  var modoMobile = false;
-
-  function esMobile() {
-    // Detectar por ancho real del viewport
-    return window.innerWidth < 768 || (window.screen.width < 768 && window.devicePixelRatio >= 1);
-  }
-
-  function aplicarModoMobile(mobile) {
-    modoMobile = mobile;
-    var navBar     = document.getElementById('mobile-nav-bar');
-    var tabsCont   = document.querySelector('.tabs-container');
-    var appLayout  = document.querySelector('.app-layout');
-    var panelCont  = document.querySelector('.panel-container');
-
-    if (mobile) {
-      // Mostrar barra de nav móvil
-      if (navBar) navBar.style.display = 'flex';
-      // Ocultar tabs container original con display:none via style (más fuerte que CSS)
-      if (tabsCont) {
-        tabsCont.style.setProperty('display', 'none', 'important');
-      }
-      // Forzar layout de bloque (sin grid)
-      if (appLayout) {
-        appLayout.style.setProperty('display', 'block', 'important');
-        appLayout.style.setProperty('grid-template-columns', 'none', 'important');
-        appLayout.style.setProperty('margin', '0', 'important');
-      }
-      if (panelCont) {
-        panelCont.style.setProperty('margin', '0 8px 100px', 'important');
-        panelCont.style.setProperty('border', 'none', 'important');
-        panelCont.style.setProperty('border-radius', '0', 'important');
-        panelCont.style.setProperty('min-height', 'auto', 'important');
-      }
-      sincronizarTitulo();
-    } else {
-      // Restaurar para desktop/tablet
-      if (navBar) navBar.style.display = 'none';
-      if (tabsCont) tabsCont.style.removeProperty('display');
-      if (appLayout) {
-        appLayout.style.removeProperty('display');
-        appLayout.style.removeProperty('grid-template-columns');
-        appLayout.style.removeProperty('margin');
-      }
-      if (panelCont) {
-        panelCont.style.removeProperty('margin');
-        panelCont.style.removeProperty('border');
-        panelCont.style.removeProperty('border-radius');
-        panelCont.style.removeProperty('min-height');
-      }
-    }
-  }
-
-  function sincronizarTitulo() {
-    var titleEl = document.getElementById('mobile-nav-title');
-    if (!titleEl) return;
-    var activeBtn = document.querySelector('.tabs-scroll .tab-btn.active');
-    if (!activeBtn) return;
-    // Intentar extraer el texto limpio (sin el número del badge)
-    var clone = activeBtn.cloneNode(true);
-    var badge = clone.querySelector('.badge');
-    if (badge) badge.remove();
-    var txt = clone.textContent.trim();
-    if (txt) titleEl.textContent = txt;
-  }
-
-  function inicializarDrawer() {
-    if (isDrawerInit) return;
-    var container = document.getElementById('drawer-tabs-container');
-    if (!container) return;
-    var tabsScroll = document.querySelector('#tabs-scroll');
-    if (!tabsScroll) return;
-
-    var allOrigBtns = Array.from(tabsScroll.querySelectorAll('.tab-btn'));
-
-    // Crear lista de botones en el drawer
-    allOrigBtns.forEach(function(origBtn) {
-      var btn = document.createElement('button');
-      btn.className = 'tab-btn' + (origBtn.classList.contains('active') ? ' active' : '');
-      // Copiar contenido HTML
-      btn.innerHTML = origBtn.innerHTML;
-      btn.addEventListener('click', function() {
-        origBtn.click();
-        cerrarDrawer();
-        sincronizarTitulo();
-      });
-      container.appendChild(btn);
-    });
-
-    isDrawerInit = true;
-  }
-
-  function sincronizarDrawerActivo() {
-    var container = document.getElementById('drawer-tabs-container');
-    if (!container) return;
-    var origBtns   = Array.from(document.querySelectorAll('#tabs-scroll .tab-btn'));
-    var drawerBtns = Array.from(container.querySelectorAll('.tab-btn'));
-    origBtns.forEach(function(orig, i) {
-      if (!drawerBtns[i]) return;
-      drawerBtns[i].classList.toggle('active', orig.classList.contains('active'));
-    });
-    sincronizarTitulo();
-  }
-
-  window.abrirDrawer = function() {
-    inicializarDrawer();
-    sincronizarDrawerActivo();
-    document.getElementById('mobile-drawer').classList.add('open');
-    document.getElementById('drawer-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  };
-
-  window.cerrarDrawer = function() {
-    var d = document.getElementById('mobile-drawer');
-    var o = document.getElementById('drawer-overlay');
-    if (d) d.classList.remove('open');
-    if (o) o.classList.remove('open');
-    document.body.style.overflow = '';
-  };
-
-  // Exponer para que showTab la llame
-  window.sincronizarDrawer = sincronizarDrawerActivo;
-
-  function onResize() {
-    var ahora = esMobile();
-    if (ahora !== modoMobile) aplicarModoMobile(ahora);
-  }
-
-  function init() {
-    aplicarModoMobile(esMobile());
-    window.addEventListener('resize', onResize, { passive: true });
-    window.addEventListener('orientationchange', function() {
-      setTimeout(onResize, 300);
-    });
-    // Observer para sincronizar título cuando cambie la pestaña activa
-    var tabsScroll = document.querySelector('#tabs-scroll');
-    if (tabsScroll) {
-      var obs = new MutationObserver(function() {
-        if (modoMobile) {
-          sincronizarTitulo();
-          sincronizarDrawerActivo();
-        }
-      });
-      obs.observe(tabsScroll, { attributes: true, subtree: true, attributeFilter: ['class'] });
-    }
-  }
-
-  // Esperar a que buildUI() haya corrido (agrega las pestañas dinámicamente)
-  // La función buildUI se llama al final del script principal — interceptamos
-  var _origBuildUI = window.buildUI;
-  var buildUIIntercepted = false;
-  function tryIntercept() {
-    if (!buildUIIntercepted && typeof window.buildUI === 'function' && window.buildUI !== interceptedBuildUI) {
-      _origBuildUI = window.buildUI;
-      window.buildUI = interceptedBuildUI;
-      buildUIIntercepted = true;
-    }
-  }
-  function interceptedBuildUI() {
-    _origBuildUI.apply(this, arguments);
-    // Después de buildUI, reiniciar el drawer
-    isDrawerInit = false;
-    aplicarModoMobile(esMobile());
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      // Intentar interceptar antes de que se ejecute buildUI
-      setTimeout(init, 100);
-    });
-  } else {
-    setTimeout(init, 100);
-  }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') cerrarDrawer();
-  });
-})();
-</script>
 
 
 </body></html>
