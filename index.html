@@ -172,6 +172,9 @@
   }
   .obs-list li:last-child { border-bottom: none; }
   .obs-list li::before { content: '★'; position: absolute; left: 0; color: var(--verde-medio); font-size: 0.75rem; top: 7px; }
+  .obs-list-diag li { color: #777; }
+  .obs-list-diag li::before { content: '○'; color: #bbb; }
+  .obs-list:empty::after { content: 'Sin observaciones agregadas aún.'; color: #bbb; font-size: 0.80rem; display:block; padding: 6px 0; }
 
   /* SEGUIMIENTO */
   .seguimiento-area {
@@ -1336,7 +1339,8 @@ parques.forEach(p => {
     estatus: 'pendiente', prioridad: 'media',
     responsable: '', fechaInicio: '', fechaMeta: '',
     presupuesto: '', notas: '', log: [],
-    items: p.infraestructura.map(() => ({ estado: 'pendiente', meta: '' }))
+    items: p.infraestructura.map(() => ({ estado: 'pendiente', meta: '' })),
+    observacionesExtra: []
   };
 });
 
@@ -1404,6 +1408,40 @@ function renderLog(parkId) {
     `<li><span class="log-date">${e.date}</span> ${e.text}</li>`
   ).join('');
 }
+
+function addObsExtra(parkId) {
+  const input = document.getElementById('obs-input-' + parkId);
+  if (!input || !input.value.trim()) return;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+  const entry = { date: dateStr, text: input.value.trim() };
+  if (!state[parkId].observacionesExtra) state[parkId].observacionesExtra = [];
+  state[parkId].observacionesExtra.unshift(entry);
+  renderObsExtra(parkId);
+  input.value = '';
+}
+
+function renderObsExtra(parkId) {
+  const ul = document.getElementById('obs-extra-' + parkId);
+  if (!ul) return;
+  const list = (state[parkId].observacionesExtra) || [];
+  if (list.length === 0) { ul.innerHTML = ''; return; }
+  ul.innerHTML = list.map((e, i) =>
+    '<li style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
+      '<span><span class="log-date">' + e.date + '</span> ' + e.text + '</span>' +
+      '<button onclick="deleteObsExtra(\'' + parkId + '\',' + i + ')" title="Eliminar"' +
+        ' style="background:none;border:none;cursor:pointer;color:#c0392b;font-size:.85rem;flex-shrink:0;padding:0 2px">✕</button>' +
+    '</li>'
+  ).join('');
+}
+
+function deleteObsExtra(parkId, idx) {
+  if (!state[parkId].observacionesExtra) return;
+  state[parkId].observacionesExtra.splice(idx, 1);
+  renderObsExtra(parkId);
+  window.saveToFirebase ? window.saveToFirebase(parkId) : saveToFirebase(parkId);
+}
+
 
 function updateParkProgress(parkId) {
   const p = parques.find(x => x.id === parkId);
@@ -1712,11 +1750,25 @@ function buildParkPanel(p, num) {
   }
 
   let obsHtml = '';
-  if (p.observaciones && p.observaciones.length > 0) {
-    const items = p.observaciones.map(o => `<li>${o}</li>`).join('');
+  {
+    const diagItems = (p.observaciones && p.observaciones.length > 0)
+      ? p.observaciones.map(o => `<li class="obs-diag-item">${o}</li>`).join('')
+      : '';
+    const diagSection = diagItems
+      ? `<div class="section-subtitle" style="font-size:.78rem;color:#888;font-weight:600;margin-bottom:4px;margin-top:2px">&#x1F4CB; Diagn\u00f3stico inicial</div>
+         <ul class="obs-list obs-list-diag">${diagItems}</ul>`
+      : '';
     obsHtml = `<div class="section">
-      <div class="section-title">Observaciones del Diagnóstico</div>
-      <ul class="obs-list">${items}</ul></div>`;
+      <div class="section-title">Observaciones del Diagn\u00f3stico</div>
+      ${diagSection}
+      <div class="section-subtitle" style="font-size:.78rem;color:#888;font-weight:600;margin:10px 0 4px">&#x270F;&#xFE0F; Observaciones agregadas</div>
+      <ul class="obs-list" id="obs-extra-${id}"></ul>
+      <div class="add-log-row" style="margin-top:8px">
+        <input type="text" id="obs-input-${id}" placeholder="Agregar nueva observaci\u00f3n\u2026"
+          onkeydown="if(event.key==='Enter')addObsExtra('${id}')">
+        <button onclick="addObsExtra('${id}')">+ Agregar</button>
+      </div>
+    </div>`;
   }
 
   return `
@@ -1829,7 +1881,7 @@ async function saveToFirebase(pid) {
       estatus: s.estatus, prioridad: s.prioridad,
       responsable: s.responsable, fechaInicio: s.fechaInicio,
       fechaMeta: s.fechaMeta, presupuesto: s.presupuesto,
-      notas: s.notas, log: s.log, items: s.items,
+      notas: s.notas, log: s.log, items: s.items, observacionesExtra: s.observacionesExtra || [],
       updatedAt: new Date().toISOString()
     });
     showSync('✅ Guardado', '#1a6e2e');
@@ -1859,6 +1911,7 @@ async function loadFromFirebase() {
         notas:       data.notas       || '',
         log:         data.log         || [],
         items:       data.items       || state[pid].items,
+        observacionesExtra: data.observacionesExtra || [],
       });
     });
     parques.forEach(p => {
@@ -1895,6 +1948,7 @@ function restoreUI(pid) {
     }
     if (met) met.value = item.meta || '';
   });
+  renderObsExtra(pid);
 }
 
 // ================================================================
@@ -1944,6 +1998,14 @@ window.saveItemMeta = function(pid, idx, val) {
 window.addLog = function(pid) {
   _addLog(pid); saveToFirebase(pid);
 };
+window.addObsExtra = function(pid) {
+  addObsExtra(pid); saveToFirebase(pid);
+};
+window.deleteObsExtra = function(pid, idx) {
+  deleteObsExtra(pid);
+  // deleteObsExtra already calls saveToFirebase internally
+};
+window.saveToFirebase = saveToFirebase;
 
 // Wire home/general tab button
 document.getElementById('tab-general').onclick = function() {
@@ -2132,8 +2194,14 @@ function exportarTodosXLS() {
       rows.push([]);
     }
     if(p.observaciones&&p.observaciones.length>0){
-      rows.push(['OBSERVACIONES:']);
+      rows.push(['OBSERVACIONES DEL DIAGNÓSTICO:']);
       p.observaciones.forEach((o,i)=>rows.push([i+1,o]));
+      rows.push([]);
+    }
+    if(s.observacionesExtra&&s.observacionesExtra.length>0){
+      rows.push(['OBSERVACIONES AGREGADAS:']);
+      rows.push(['Fecha','Observación']);
+      s.observacionesExtra.forEach(e=>rows.push([e.date,e.text]));
       rows.push([]);
     }
     if(s.log&&s.log.length>0){
@@ -2184,6 +2252,12 @@ function exportarParqueXLS(pid) {
   if(p.observaciones&&p.observaciones.length>0){
     rows.push(['OBSERVACIONES DEL DIAGNÓSTICO']);
     p.observaciones.forEach((o,i)=>rows.push([i+1,o]));
+    rows.push([]);
+  }
+  if(s.observacionesExtra&&s.observacionesExtra.length>0){
+    rows.push(['OBSERVACIONES AGREGADAS']);
+    rows.push(['Fecha','Observación']);
+    s.observacionesExtra.forEach(e=>rows.push([e.date,e.text]));
     rows.push([]);
   }
   if(s.log&&s.log.length>0){
