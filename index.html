@@ -67,29 +67,23 @@
   }
   .search-bar input:focus { border-color: var(--verde); }
 
-  /* TABS */
-  .tabs-container { margin: 14px 20px 0; }
-  .tabs-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
-  .tabs-scroll::-webkit-scrollbar { height: 4px; }
-  .tabs-scroll::-webkit-scrollbar-thumb { background: #b2dfdb; border-radius: 4px; }
-  .tabs-container { background: #dce6f5; padding: 10px 20px 0; border-bottom: 3px solid var(--verde); }
+  /* TABS — estilos base neutrales; los estilos reales los aplica el sistema responsive */
+  .tabs-container { }
+  .tabs-scroll { display: flex; overflow-x: auto; }
   .tab-btn {
-    flex-shrink: 0; padding: 9px 16px; border: 2px solid #b2d4b2;
-    background: white; border-radius: 8px 8px 0 0; cursor: pointer;
-    font-size: 0.82rem; font-weight: 700; color: var(--verde-oscuro);
-    border-bottom: 3px solid transparent; transition: all .18s;
-    box-shadow: 0 2px 6px rgba(0,0,0,.10); white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 0.15s, border-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
-  .tab-btn:hover { background: #c8e6c9; color: var(--verde-oscuro); border-color: var(--verde); transform: translateY(-2px); }
-  .tab-btn.active { background: var(--verde); color: white; border-color: var(--verde); border-bottom-color: var(--verde); transform: translateY(0); box-shadow: 0 3px 10px rgba(26,110,46,.35); }
   .tab-btn .badge {
-    display: inline-block; background: rgba(255,255,255,0.35); color: inherit;
+    display: inline-block;
     border-radius: 10px; padding: 1px 7px; font-size: 0.70rem; margin-left: 5px; font-weight: 800;
   }
-  .tab-btn:not(.active) .badge { background: #e8f5e9; color: var(--verde); }
 
-  /* PANEL */
-  .panel-container { margin: 0 20px 28px; }
+  /* PANEL — base */
   .panel { display: none; }
   .panel.active { display: block; }
   .panel.active .map-container,
@@ -249,13 +243,7 @@
   .mini-bar-inner { height: 100%; background: linear-gradient(90deg, #4a7fc1, #1a3a6b); border-radius: 4px; transition: width .4s; }
 
   /* RESPONSIVE */
-  @media (max-width: 700px) {
-    header { padding: 12px 14px; }
-    .resumen-global, .search-bar, .tabs-container, .panel-container { margin-left: 10px; margin-right: 10px; }
-    .section { padding: 12px 14px; }
-    .needs-table { font-size: 0.77rem; }
-    .park-hero { flex-direction: column; }
-  }
+  /* old 700px rule removed — handled by mobile-first */
 
   /* ── DOWNLOAD BUTTONS ── */
   .btn-download {
@@ -291,159 +279,161 @@
   .layer-btn.active, .layer-btn:hover { background: var(--verde); color: white; border-color: var(--verde); }
 
 /* ================================================================
-   RESPONSIVE SYSTEM — Mobile · Tablet · Desktop
-   Breakpoints: mobile <768px | tablet 768-1199px | desktop ≥1200px
+   RESPONSIVE SYSTEM — MOBILE-FIRST
+   Mobile: default (sin media query)
+   Tablet: min-width: 768px
+   Desktop: min-width: 1200px
 ================================================================ */
 
-/* ── Variables ── */
 :root {
-  --sidebar-w: 280px;
+  --sidebar-w: 260px;
   --touch-min: 48px;
-  --font-field: 1rem;       /* 16px base */
-  --font-label: 0.82rem;
-  --font-small: 0.78rem;
 }
 
-/* ── MOBILE default (ya existente, no se toca) ── */
-/* ── ELEMENTOS SOLO MÓVIL — ocultos por defecto ── */
-#mobile-menu-btn { display: none; }
-#mobile-nav-bar  { display: none; }
-#drawer-overlay  { display: none; }
-#mobile-drawer   { display: none; }
+/* ══════════════════════════════════════════════════════════════
+   MOBILE DEFAULT — aplica a TODOS los dispositivos por defecto
+   Los breakpoints superiores SOBREESCRIBEN lo necesario
+══════════════════════════════════════════════════════════════ */
 
-/* ── MÓVIL: ≤767px — pestañas horizontales con scroll ── */
-@media (max-width: 767px) {
-  /* Mapas */
-  .map-container,
-  .map-container > div,
-  .leaflet-container {
-    height: 220px !important;
-    min-height: 220px !important;
-    width: 100% !important;
-  }
-  #overview-map,
-  #overview-map.leaflet-container {
-    height: 260px !important;
-    min-height: 260px !important;
-  }
-
-  /* Layout: bloque simple */
-  .app-layout { display: block !important; grid-template-columns: none !important; margin: 0 !important; }
-  .sidebar-label { display: none; }
-
-  /* ── BARRA DE PESTAÑAS MÓVIL ──
-     Sticky debajo del header, scroll horizontal, botones táctiles */
-  .tabs-container {
-    display: block !important;
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 500 !important;
-    background: #1a3a6b !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border-bottom: none !important;
-    border-radius: 0 !important;
-  }
-  .tabs-scroll {
-    display: flex !important;
-    flex-direction: row !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    scroll-snap-type: x mandatory !important;
-    gap: 0 !important;
-    padding: 6px 8px !important;
-    max-height: none !important;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-  }
-  .tabs-scroll::-webkit-scrollbar { height: 3px; }
-  .tabs-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 3px; }
-
-  /* Botones de pestaña en móvil — compactos y táctiles */
-  .tab-btn {
-    flex-shrink: 0 !important;
-    scroll-snap-align: start !important;
-    min-height: 44px !important;
-    height: 44px !important;
-    padding: 0 12px !important;
-    border-radius: 6px !important;
-    border: 1px solid rgba(255,255,255,0.2) !important;
-    border-bottom: 3px solid transparent !important;
-    background: rgba(255,255,255,0.08) !important;
-    color: rgba(255,255,255,0.85) !important;
-    font-size: 0.78rem !important;
-    font-weight: 600 !important;
-    white-space: nowrap !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 5px !important;
-    cursor: pointer !important;
-    margin-right: 5px !important;
-    box-shadow: none !important;
-    transform: none !important;
-    line-height: 1 !important;
-    width: auto !important;
-    text-align: center !important;
-    -webkit-tap-highlight-color: transparent !important;
-    touch-action: manipulation !important;
-    transition: background 0.15s, border-color 0.15s !important;
-  }
-  .tab-btn:active {
-    background: rgba(255,255,255,0.25) !important;
-  }
-  .tab-btn.active {
-    background: white !important;
-    color: #1a3a6b !important;
-    border-color: white !important;
-    border-bottom-color: #f9a825 !important;
-    font-weight: 800 !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-  }
-  .tab-btn .badge {
-    background: rgba(255,255,255,0.2) !important;
-    color: rgba(255,255,255,0.9) !important;
-    border-radius: 10px !important;
-    padding: 1px 6px !important;
-    font-size: 0.68rem !important;
-    font-weight: 800 !important;
-    margin-left: 2px !important;
-  }
-  .tab-btn.active .badge {
-    background: #f9a825 !important;
-    color: #1a3a6b !important;
-  }
-
-  /* Panel */
-  .panel-container {
-    margin: 8px 6px 100px !important;
-    border: none !important;
-    border-radius: 0 !important;
-    min-height: auto !important;
-    background: transparent !important;
-  }
-
-  /* Scroll automático a la pestaña activa */
-  .tab-btn.active {
-    scroll-margin-left: 8px;
-  }
-
-  /* Tabla de necesidades más compacta */
-  .needs-table { font-size: 0.74rem; }
-  .needs-table td, .needs-table th { padding: 6px 8px; }
-
-  /* Seguimiento 1 columna */
-  .seguimiento-area { grid-template-columns: 1fr !important; }
-
-  /* Secciones con menos padding */
-  .section { padding: 10px 12px; }
-  .park-hero { flex-direction: column; }
+/* Mapas */
+.map-container,
+.map-container > div,
+.leaflet-container {
+  height: 220px !important;
+  min-height: 220px !important;
+  width: 100% !important;
+}
+#overview-map,
+#overview-map.leaflet-container {
+  height: 260px !important;
+  min-height: 260px !important;
 }
 
-/* ── TABLET: 768px – 1199px ── */
-@media (min-width: 768px) and (max-width: 1199px) {
+/* Layout móvil: bloque simple, sin grid */
+.app-layout {
+  display: block;
+  margin: 0;
+}
+
+/* Ocultar label de sidebar en móvil */
+.sidebar-label { display: none; }
+
+/* ── BARRA DE PESTAÑAS MÓVIL ──
+   Sticky, scroll horizontal, botones táctiles compactos */
+.tabs-container {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  background: #1a3a6b;
+  padding: 0;
+  margin: 0;
+  border-bottom: none;
+  border-radius: 0;
+}
+.tabs-scroll {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  gap: 0;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  max-height: none;
+}
+.tabs-scroll::-webkit-scrollbar { height: 3px; }
+.tabs-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 3px; }
+
+/* Botones de pestaña — compactos y táctiles */
+.tab-btn {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  min-height: 44px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  border-bottom: 3px solid transparent !important;
+  background: rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.85) !important;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  margin-right: 5px;
+  box-shadow: none !important;
+  transform: none !important;
+  line-height: 1;
+  width: auto;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tab-btn:hover,
+.tab-btn:active {
+  background: rgba(255,255,255,0.2) !important;
+  transform: none !important;
+}
+.tab-btn.active {
+  background: white !important;
+  color: #1a3a6b !important;
+  border-color: white !important;
+  border-bottom-color: #f9a825 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+  transform: none !important;
+}
+.tab-btn .badge {
+  background: rgba(255,255,255,0.2) !important;
+  color: rgba(255,255,255,0.9) !important;
+  border-radius: 10px !important;
+  padding: 1px 6px !important;
+  font-size: 0.68rem !important;
+  font-weight: 800 !important;
+  margin-left: 2px !important;
+}
+.tab-btn:not(.active) .badge { background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); }
+.tab-btn.active .badge {
+  background: #f9a825 !important;
+  color: #1a3a6b !important;
+}
+
+/* Panel content */
+.panel-container {
+  margin: 8px 6px 100px;
+  background: transparent;
+}
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Tabla compacta */
+.needs-table { font-size: 0.77rem; }
+.needs-table td, .needs-table th { padding: 6px 8px; }
+.park-hero { flex-direction: column; }
+.section { padding: 10px 12px; }
+.seguimiento-area { grid-template-columns: 1fr; }
+
+/* Touch targets */
+.estado-select { min-height: 44px; padding: 8px 10px; font-size: 0.88rem; }
+.btn-save { min-height: 48px; padding: 12px 20px; font-size: 0.9rem; }
+.btn-download { min-height: 44px; padding: 9px 14px; font-size: 0.82rem; }
+.add-log-row input { min-height: 44px; padding: 10px 12px; font-size: 0.9rem; }
+.add-log-row button { min-height: 44px; padding: 10px 16px; font-size: 0.88rem; }
+
+#tablet-toggle { display: none; }
+
+/* ══════════════════════════════════════════════════════════════
+   TABLET — min-width: 768px
+══════════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
   html { font-size: 16px; }
 
   /* Layout sidebar + content */
@@ -473,13 +463,16 @@
     flex: 1;
     padding: 6px 0;
     gap: 2px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
   }
-  .tabs-scroll::-webkit-scrollbar { width: 4px; }
+  .tabs-scroll::-webkit-scrollbar { width: 4px; height: auto; }
   .tabs-scroll::-webkit-scrollbar-thumb { background: #a5c8a5; border-radius: 4px; }
 
-  /* Tab buttons — vertical, touch 52px */
   .tab-btn {
     min-height: 52px !important;
+    height: auto !important;
     padding: 10px 14px !important;
     border-radius: 0 !important;
     border: none !important;
@@ -496,17 +489,30 @@
     white-space: normal !important;
     line-height: 1.3;
     transform: none !important;
+    margin-right: 0;
+    scroll-snap-align: none;
   }
   .tab-btn:hover  { background: #dce6f5 !important; border-left-color: #2d5f9e !important; }
-  .tab-btn.active { background: white !important; border-left-color: var(--verde) !important;
-                    color: var(--verde) !important; font-weight: 800 !important;
-                    box-shadow: 2px 0 6px rgba(0,0,0,.08) !important; }
-  .tab-btn .badge { flex-shrink: 0; margin-left: 6px; background: #e8f5e9;
-                    color: #2e7d32; border-radius: 20px; padding: 2px 7px;
-                    font-size: 0.70rem; font-weight: 800; }
+  .tab-btn.active {
+    background: white !important;
+    border-left-color: var(--verde) !important;
+    color: var(--verde) !important;
+    font-weight: 800 !important;
+    box-shadow: 2px 0 6px rgba(0,0,0,.08) !important;
+    border-bottom-color: transparent !important;
+  }
+  .tab-btn .badge {
+    flex-shrink: 0;
+    margin-left: 6px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 20px;
+    padding: 2px 7px;
+    font-size: 0.70rem;
+    font-weight: 800;
+  }
   .tab-btn.active .badge { background: rgba(26,110,46,.15); color: var(--verde); }
 
-  /* Panel content */
   .panel-container {
     margin: 0 !important;
     border-radius: 0 12px 12px 0 !important;
@@ -516,42 +522,27 @@
     min-height: 600px;
   }
 
-  /* Touch targets */
+  .sidebar-label { display: inline; }
   .estado-select    { min-height: var(--touch-min) !important; padding: 10px 12px !important; font-size: 0.92rem !important; }
   .layer-btn        { min-height: 44px !important; padding: 10px 16px !important; font-size: 0.88rem !important; }
   .btn-save         { min-height: 52px !important; padding: 14px 26px !important; font-size: 1rem !important; }
   .btn-download     { min-height: var(--touch-min) !important; padding: 11px 16px !important; font-size: 0.88rem !important; }
-  .add-log-row input  { min-height: var(--touch-min); padding: 11px 14px; font-size: 0.95rem; }
-  .add-log-row button { min-height: var(--touch-min); padding: 11px 18px; font-size: 0.92rem; }
-  .seguimiento-field input,
-  .seguimiento-field select,
-  .seguimiento-field textarea { min-height: var(--touch-min) !important; padding: 10px 13px !important; font-size: 0.95rem !important; }
-
-  /* Seguimiento 2 columns */
   .seguimiento-area { grid-template-columns: repeat(2, 1fr) !important; }
-
-  /* Maps */
   .map-container { height: 300px !important; }
   #overview-map  { height: 400px !important; }
-
-  /* Text sizes */
   .needs-table { font-size: 0.92rem; }
   .needs-table td, .needs-table th { padding: 10px 12px; }
-  .section-title { font-size: 0.88rem; padding: 12px 20px; }
-  .overview-item { padding: 16px 18px; min-height: 88px; }
-  .overview-item h3 { font-size: 0.95rem; }
-  .stat-card .num { font-size: 1.9rem; }
-  .stat-card .lbl { font-size: 0.82rem; }
-
-  /* Hide tablet toggle in real tablet (auto-applies) */
+  .section { padding: 12px 20px; }
+  .park-hero { flex-direction: row; }
   #tablet-toggle { display: none; }
 }
 
-/* ── DESKTOP: ≥ 1200px ── */
+/* ══════════════════════════════════════════════════════════════
+   DESKTOP — min-width: 1200px
+══════════════════════════════════════════════════════════════ */
 @media (min-width: 1200px) {
   html { font-size: 15px; }
 
-  /* Full width layout — NO sidebar, tabs horizontal on top */
   .app-layout {
     display: block;
     margin: 0;
@@ -562,6 +553,11 @@
     padding: 10px 24px 0;
     border-bottom: 3px solid var(--verde);
     border-radius: 0;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    display: block;
+    flex-direction: unset;
   }
   .tabs-scroll {
     flex-direction: row !important;
@@ -577,6 +573,7 @@
   .tab-btn {
     flex-shrink: 0 !important;
     min-height: 40px !important;
+    height: auto !important;
     padding: 8px 16px !important;
     border-radius: 8px 8px 0 0 !important;
     border: 2px solid #b2d4b2 !important;
@@ -594,12 +591,23 @@
     box-shadow: 0 2px 6px rgba(0,0,0,.08) !important;
     transform: none;
     line-height: 1;
+    margin-right: 0;
+    scroll-snap-align: none;
   }
-  .tab-btn:hover  { background: #c8e6c9 !important; color: var(--verde-oscuro) !important;
-                    border-color: var(--verde) !important; transform: translateY(-2px) !important; }
-  .tab-btn.active { background: var(--verde) !important; color: white !important;
-                    border-color: var(--verde) !important; transform: none !important;
-                    box-shadow: 0 3px 10px rgba(26,110,46,.35) !important; }
+  .tab-btn:hover  {
+    background: #c8e6c9 !important;
+    color: var(--verde-oscuro) !important;
+    border-color: var(--verde) !important;
+    transform: translateY(-2px) !important;
+  }
+  .tab-btn.active {
+    background: var(--verde) !important;
+    color: white !important;
+    border-color: var(--verde) !important;
+    transform: none !important;
+    box-shadow: 0 3px 10px rgba(26,110,46,.35) !important;
+    border-bottom-color: var(--verde) !important;
+  }
   .tab-btn .badge { background: rgba(255,255,255,.3); color: inherit; }
   .tab-btn:not(.active) .badge { background: #e8f5e9; color: var(--verde); }
 
@@ -607,9 +615,10 @@
     margin: 0 24px 28px !important;
     border-radius: 0 12px 12px 12px !important;
     border: none !important;
+    background: transparent;
+    min-height: auto;
   }
 
-  /* Desktop: map + table side by side */
   .desktop-two-col {
     display: grid;
     grid-template-columns: 420px 1fr;
@@ -622,11 +631,8 @@
   #overview-map  { height: 440px !important; }
   .needs-table { font-size: 0.88rem; }
   .seguimiento-area { grid-template-columns: repeat(3, 1fr) !important; }
-
   #tablet-toggle { display: none; }
-}0,0,.4);
-  }eZ(0) scale(0.92) !important;
-  }
+}
 
 </style>
 </head>
