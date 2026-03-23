@@ -635,16 +635,6 @@
 }
 
 </style>
-<style id="movil-fix">
-body.movil .app-layout{display:block!important;grid-template-columns:none!important;margin:0!important}
-body.movil .tabs-container{position:sticky!important;top:0!important;z-index:9999!important;background:#1a3a6b!important;padding:0!important;margin:0!important;border:none!important;border-radius:0!important;display:block!important;max-height:none!important;overflow:visible!important}
-body.movil .tabs-scroll{display:flex!important;flex-direction:row!important;overflow-x:scroll!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;flex-wrap:nowrap!important;gap:0!important;padding:6px 8px 8px!important;background:transparent!important;border:none!important;border-radius:0!important;max-height:none!important}
-body.movil .tab-btn{flex-shrink:0!important;min-height:44px!important;height:44px!important;padding:0 14px!important;border-radius:8px!important;border:1.5px solid rgba(255,255,255,0.3)!important;border-bottom:3px solid transparent!important;background:rgba(255,255,255,0.1)!important;color:rgba(255,255,255,0.9)!important;font-size:0.82rem!important;font-weight:600!important;white-space:nowrap!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;cursor:pointer!important;margin-right:6px!important;box-shadow:none!important;transform:none!important;line-height:1!important;width:auto!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important}
-body.movil .tab-btn.active{background:#fff!important;color:#1a3a6b!important;border-color:#fff!important;border-bottom-color:#f9a825!important;font-weight:800!important;box-shadow:0 2px 10px rgba(0,0,0,0.25)!important}
-body.movil .tab-btn .badge{background:rgba(255,255,255,0.25)!important;color:white!important;border-radius:12px!important;padding:1px 7px!important;font-size:0.70rem!important;font-weight:800!important;margin-left:2px!important}
-body.movil .tab-btn.active .badge{background:#f9a825!important;color:#1a3a6b!important}
-body.movil .panel-container{margin:8px 6px 100px!important;border:none!important;border-radius:0!important;min-height:auto!important;background:transparent!important}
-</style>
 </head>
 <body>
 
@@ -2183,17 +2173,134 @@ function exportarParqueXLS(pid) {
 
 
 
-<script id="movil-js">
+<script id="movil-fix-js">
 (function(){
-  function m(){
-    var w=window.innerWidth||document.documentElement.clientWidth||800;
-    document.body.classList.toggle('movil', w<900);
+  function aplicar(){
+    var w = window.innerWidth || screen.width || 400;
+    var esMovil = (w < 1100); // umbral alto para cubrir cualquier caso
+
+    var tabsCont = document.querySelector('.tabs-container');
+    var tabsScroll = document.querySelector('.tabs-scroll');
+    var appLayout = document.querySelector('.app-layout');
+    var panelCont = document.querySelector('.panel-container');
+    var allBtns = document.querySelectorAll('.tab-btn');
+
+    if(!tabsCont) return; // buildUI no ha corrido aún
+
+    if(esMovil){
+      // Forzar estilos DIRECTAMENTE en los elementos
+      appLayout && (appLayout.style.cssText = 'display:block!important;grid-template-columns:none!important;margin:0!important;');
+      
+      tabsCont.style.cssText = [
+        'position:sticky!important',
+        'top:0!important',
+        'z-index:9999!important',
+        'background:#1a3a6b!important',
+        'padding:0!important',
+        'margin:0!important',
+        'border:none!important',
+        'border-radius:0!important',
+        'display:block!important',
+        'max-height:none!important',
+        'overflow:visible!important'
+      ].join(';');
+
+      tabsScroll && (tabsScroll.style.cssText = [
+        'display:flex!important',
+        'flex-direction:row!important',
+        'overflow-x:scroll!important',
+        'overflow-y:hidden!important',
+        '-webkit-overflow-scrolling:touch!important',
+        'flex-wrap:nowrap!important',
+        'gap:0!important',
+        'padding:6px 8px 8px!important',
+        'background:transparent!important',
+        'border:none!important',
+        'border-radius:0!important',
+        'max-height:none!important'
+      ].join(';'));
+
+      allBtns.forEach(function(btn){
+        var isActive = btn.classList.contains('active');
+        btn.style.cssText = [
+          'flex-shrink:0!important',
+          'min-height:44px!important',
+          'height:44px!important',
+          'padding:0 14px!important',
+          'border-radius:8px!important',
+          'border:1.5px solid rgba(255,255,255,0.3)!important',
+          'border-bottom:3px solid ' + (isActive ? '#f9a825' : 'transparent') + '!important',
+          'background:' + (isActive ? '#ffffff' : 'rgba(255,255,255,0.1)') + '!important',
+          'color:' + (isActive ? '#1a3a6b' : 'rgba(255,255,255,0.9)') + '!important',
+          'font-size:0.82rem!important',
+          'font-weight:' + (isActive ? '800' : '600') + '!important',
+          'white-space:nowrap!important',
+          'display:inline-flex!important',
+          'align-items:center!important',
+          'justify-content:center!important',
+          'gap:6px!important',
+          'cursor:pointer!important',
+          'margin-right:6px!important',
+          'box-shadow:none!important',
+          'transform:none!important',
+          'line-height:1!important',
+          'width:auto!important',
+          '-webkit-tap-highlight-color:transparent!important',
+          'touch-action:manipulation!important'
+        ].join(';');
+      });
+
+      panelCont && (panelCont.style.cssText = 'margin:8px 6px 100px!important;border:none!important;border-radius:0!important;min-height:auto!important;background:transparent!important;');
+
+    } else {
+      // Desktop: quitar estilos inline
+      appLayout && (appLayout.style.cssText = '');
+      tabsCont && (tabsCont.style.cssText = '');
+      tabsScroll && (tabsScroll.style.cssText = '');
+      allBtns.forEach(function(btn){ btn.style.cssText = ''; });
+      panelCont && (panelCont.style.cssText = '');
+    }
   }
-  if(document.body)m();
-  document.addEventListener('DOMContentLoaded',m);
-  window.addEventListener('resize',m);
-  window.addEventListener('orientationchange',function(){setTimeout(m,300)});
-  setTimeout(m,200);setTimeout(m,600);setTimeout(m,1500);
+
+  // Ejecutar múltiples veces para asegurar que buildUI ya corrió
+  document.addEventListener('DOMContentLoaded', aplicar);
+  window.addEventListener('load', aplicar);
+  window.addEventListener('resize', aplicar);
+  window.addEventListener('orientationchange', function(){ setTimeout(aplicar,300); });
+  [100, 300, 600, 1000, 2000, 3000].forEach(function(t){ setTimeout(aplicar,t); });
+
+  // Interceptar buildUI para re-aplicar después de que cargue las pestañas
+  var _origBuildUI = window.buildUI;
+  window.buildUI = function(){
+    if(_origBuildUI) _origBuildUI.apply(this, arguments);
+    setTimeout(aplicar, 50);
+    setTimeout(aplicar, 200);
+  };
 })();
 </script>
+<script id="movil-showtab-patch">
+(function(){
+  // Re-aplicar estilos móviles después de cambiar de pestaña
+  var _origShow = window.showTab;
+  window.showTab = function(id, btn){
+    if(_origShow) _origShow.apply(this, arguments);
+    // Re-colorear el botón activo
+    var allBtns = document.querySelectorAll('.tabs-scroll .tab-btn');
+    var w = window.innerWidth || screen.width || 400;
+    if(w < 1100){
+      allBtns.forEach(function(b){
+        var isActive = b.classList.contains('active');
+        b.style.setProperty('background', isActive ? '#ffffff' : 'rgba(255,255,255,0.1)', 'important');
+        b.style.setProperty('color', isActive ? '#1a3a6b' : 'rgba(255,255,255,0.9)', 'important');
+        b.style.setProperty('border-bottom', '3px solid ' + (isActive ? '#f9a825' : 'transparent'), 'important');
+        b.style.setProperty('font-weight', isActive ? '800' : '600', 'important');
+      });
+      // Scroll to active
+      var active = document.querySelector('.tabs-scroll .tab-btn.active');
+      if(active) active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'nearest'});
+    }
+  };
+})();
+</script>
+
 </body></html>
