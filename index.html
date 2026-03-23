@@ -172,9 +172,6 @@
   }
   .obs-list li:last-child { border-bottom: none; }
   .obs-list li::before { content: '★'; position: absolute; left: 0; color: var(--verde-medio); font-size: 0.75rem; top: 7px; }
-  .obs-list-diag li { color: #777; }
-  .obs-list-diag li::before { content: '○'; color: #bbb; }
-  .obs-list:empty::after { content: 'Sin observaciones agregadas aún.'; color: #bbb; font-size: 0.80rem; display:block; padding: 6px 0; }
 
   /* SEGUIMIENTO */
   .seguimiento-area {
@@ -1410,28 +1407,26 @@ function renderLog(parkId) {
 }
 
 function addObsExtra(parkId) {
-  const input = document.getElementById('obs-input-' + parkId);
-  if (!input || !input.value.trim()) return;
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
-  const entry = { date: dateStr, text: input.value.trim() };
+  const inp = document.getElementById('obs-input-' + parkId);
+  if (!inp || !inp.value.trim()) return;
+  const d = new Date().toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'});
   if (!state[parkId].observacionesExtra) state[parkId].observacionesExtra = [];
-  state[parkId].observacionesExtra.unshift(entry);
+  state[parkId].observacionesExtra.unshift({ date: d, text: inp.value.trim() });
   renderObsExtra(parkId);
-  input.value = '';
+  inp.value = '';
+  saveToFirebase(parkId);
 }
 
 function renderObsExtra(parkId) {
   const ul = document.getElementById('obs-extra-' + parkId);
   if (!ul) return;
-  const list = (state[parkId].observacionesExtra) || [];
-  if (list.length === 0) { ul.innerHTML = ''; return; }
+  const list = state[parkId].observacionesExtra || [];
   ul.innerHTML = list.map((e, i) =>
-    '<li style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
-      '<span><span class="log-date">' + e.date + '</span> ' + e.text + '</span>' +
-      '<button onclick="deleteObsExtra(\'' + parkId + '\',' + i + ')" title="Eliminar"' +
-        ' style="background:none;border:none;cursor:pointer;color:#c0392b;font-size:.85rem;flex-shrink:0;padding:0 2px">✕</button>' +
-    '</li>'
+    `<li style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <span><span class="log-date">${e.date}</span> ${e.text}</span>
+      <button onclick="deleteObsExtra('${parkId}',${i})" title="Eliminar"
+        style="background:none;border:none;cursor:pointer;color:#c0392b;font-size:.85rem;flex-shrink:0;padding:0 2px">✕</button>
+    </li>`
   ).join('');
 }
 
@@ -1439,9 +1434,8 @@ function deleteObsExtra(parkId, idx) {
   if (!state[parkId].observacionesExtra) return;
   state[parkId].observacionesExtra.splice(idx, 1);
   renderObsExtra(parkId);
-  window.saveToFirebase ? window.saveToFirebase(parkId) : saveToFirebase(parkId);
+  saveToFirebase(parkId);
 }
-
 
 function updateParkProgress(parkId) {
   const p = parques.find(x => x.id === parkId);
@@ -1752,19 +1746,13 @@ function buildParkPanel(p, num) {
   let obsHtml = '';
   {
     const diagItems = (p.observaciones && p.observaciones.length > 0)
-      ? p.observaciones.map(o => `<li class="obs-diag-item">${o}</li>`).join('')
-      : '';
-    const diagSection = diagItems
-      ? `<div class="section-subtitle" style="font-size:.78rem;color:#888;font-weight:600;margin-bottom:4px;margin-top:2px">&#x1F4CB; Diagn\u00f3stico inicial</div>
-         <ul class="obs-list obs-list-diag">${diagItems}</ul>`
-      : '';
+      ? p.observaciones.map(o => `<li>${o}</li>`).join('') : '';
     obsHtml = `<div class="section">
-      <div class="section-title">Observaciones del Diagn\u00f3stico</div>
-      ${diagSection}
-      <div class="section-subtitle" style="font-size:.78rem;color:#888;font-weight:600;margin:10px 0 4px">&#x270F;&#xFE0F; Observaciones agregadas</div>
+      <div class="section-title">Observaciones del Diagnóstico</div>
+      ${diagItems ? `<ul class="obs-list">${diagItems}</ul>` : ''}
       <ul class="obs-list" id="obs-extra-${id}"></ul>
       <div class="add-log-row" style="margin-top:8px">
-        <input type="text" id="obs-input-${id}" placeholder="Agregar nueva observaci\u00f3n\u2026"
+        <input type="text" id="obs-input-${id}" placeholder="Agregar observación…"
           onkeydown="if(event.key==='Enter')addObsExtra('${id}')">
         <button onclick="addObsExtra('${id}')">+ Agregar</button>
       </div>
@@ -1939,6 +1927,7 @@ function restoreUI(pid) {
   if (g('seg-finicio-' + pid)) g('seg-finicio-' + pid).value = s.fechaInicio;
   if (g('seg-fmeta-'   + pid)) g('seg-fmeta-'   + pid).value = s.fechaMeta;
   if (g('seg-notas-'   + pid)) g('seg-notas-'   + pid).value = s.notas;
+  renderObsExtra(pid);
   s.items.forEach((item, i) => {
     const sel = g('item-estado-' + pid + '-' + i);
     const met = g('item-meta-'   + pid + '-' + i);
@@ -1948,7 +1937,6 @@ function restoreUI(pid) {
     }
     if (met) met.value = item.meta || '';
   });
-  renderObsExtra(pid);
 }
 
 // ================================================================
@@ -1998,14 +1986,8 @@ window.saveItemMeta = function(pid, idx, val) {
 window.addLog = function(pid) {
   _addLog(pid); saveToFirebase(pid);
 };
-window.addObsExtra = function(pid) {
-  addObsExtra(pid); saveToFirebase(pid);
-};
-window.deleteObsExtra = function(pid, idx) {
-  deleteObsExtra(pid);
-  // deleteObsExtra already calls saveToFirebase internally
-};
-window.saveToFirebase = saveToFirebase;
+window.addObsExtra = addObsExtra;
+window.deleteObsExtra = deleteObsExtra;
 
 // Wire home/general tab button
 document.getElementById('tab-general').onclick = function() {
@@ -2194,14 +2176,8 @@ function exportarTodosXLS() {
       rows.push([]);
     }
     if(p.observaciones&&p.observaciones.length>0){
-      rows.push(['OBSERVACIONES DEL DIAGNÓSTICO:']);
+      rows.push(['OBSERVACIONES:']);
       p.observaciones.forEach((o,i)=>rows.push([i+1,o]));
-      rows.push([]);
-    }
-    if(s.observacionesExtra&&s.observacionesExtra.length>0){
-      rows.push(['OBSERVACIONES AGREGADAS:']);
-      rows.push(['Fecha','Observación']);
-      s.observacionesExtra.forEach(e=>rows.push([e.date,e.text]));
       rows.push([]);
     }
     if(s.log&&s.log.length>0){
@@ -2252,12 +2228,6 @@ function exportarParqueXLS(pid) {
   if(p.observaciones&&p.observaciones.length>0){
     rows.push(['OBSERVACIONES DEL DIAGNÓSTICO']);
     p.observaciones.forEach((o,i)=>rows.push([i+1,o]));
-    rows.push([]);
-  }
-  if(s.observacionesExtra&&s.observacionesExtra.length>0){
-    rows.push(['OBSERVACIONES AGREGADAS']);
-    rows.push(['Fecha','Observación']);
-    s.observacionesExtra.forEach(e=>rows.push([e.date,e.text]));
     rows.push([]);
   }
   if(s.log&&s.log.length>0){
