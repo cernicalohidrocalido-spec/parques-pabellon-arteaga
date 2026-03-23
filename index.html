@@ -1336,7 +1336,7 @@ parques.forEach(p => {
     estatus: 'pendiente', prioridad: 'media',
     responsable: '', fechaInicio: '', fechaMeta: '',
     presupuesto: '', notas: '', log: [],
-    items: p.infraestructura.map(() => ({ estado: 'pendiente', meta: '' })),
+    items: p.infraestructura.map(() => ({ estado: 'pendiente', meta: '', obs: '' })),
     observacionesExtra: []
   };
 });
@@ -1365,6 +1365,12 @@ function updateItemEstado(parkId, itemIdx, select) {
 
 function saveItemMeta(parkId, itemIdx, val) {
   state[parkId].items[itemIdx].meta = val;
+}
+
+function saveItemObs(parkId, itemIdx, val) {
+  state[parkId].items[itemIdx].obs = val;
+  clearTimeout(window._obsTimer);
+  window._obsTimer = setTimeout(() => saveToFirebase(parkId), 1200);
 }
 
 function saveSeg(parkId) {
@@ -1732,7 +1738,8 @@ function buildParkPanel(p, num) {
         </select></td>
         <td><input class="meta-input" type="text" id="item-meta-${id}-${i}"
           placeholder="${meta}" oninput="saveItemMeta('${id}',${i},this.value)"></td>
-        <td style="color:#888;font-size:.78rem">${obs}</td>
+        <td><input class="meta-input" type="text" id="item-obs-${id}-${i}"
+          placeholder="${obs || '—'}" oninput="saveItemObs('${id}',${i},this.value)"></td>
       </tr>`;
     }).join('');
     infraHtml = `<div class="section">
@@ -1936,6 +1943,8 @@ function restoreUI(pid) {
       sel.className = 'estado-select estado-' + (item.estado || 'pendiente');
     }
     if (met) met.value = item.meta || '';
+    const ob = g('item-obs-' + pid + '-' + i);
+    if (ob) ob.value = item.obs || '';
   });
 }
 
@@ -1977,6 +1986,9 @@ window.saveSeg = function(pid) {
 };
 window.updateItemEstado = function(pid, idx, sel) {
   _updateItemEstado(pid, idx, sel); saveToFirebase(pid);
+};
+window.saveItemObs = function(pid, idx, val) {
+  saveItemObs(pid, idx, val);
 };
 window.saveItemMeta = function(pid, idx, val) {
   _saveItemMeta(pid, idx, val);
@@ -2171,7 +2183,7 @@ function exportarTodosXLS() {
       rows.push(['#','Elemento','Indicador','Estado','Meta','Observación']);
       p.infraestructura.forEach((it,i)=>{
         const item=s.items[i]||{};
-        rows.push([i+1,it.item,it.indicador||'—',estadoLabel(item.estado||'pendiente'),item.meta||it.meta||'',it.obs||'']);
+        rows.push([i+1,it.item,it.indicador||'—',estadoLabel(item.estado||'pendiente'),item.meta||it.meta||'',item.obs||it.obs||'']);
       });
       rows.push([]);
     }
@@ -2212,7 +2224,7 @@ function exportarParqueXLS(pid) {
     rows.push(['#','Elemento','Indicador','Estado','Meta / Cantidad','Observación']);
     p.infraestructura.forEach((it,i)=>{
       const item=s.items[i]||{};
-      rows.push([i+1,it.item,it.indicador||'—',estadoLabel(item.estado||'pendiente'),item.meta||it.meta||'',it.obs||'']);
+      rows.push([i+1,it.item,it.indicador||'—',estadoLabel(item.estado||'pendiente'),item.meta||it.meta||'',item.obs||it.obs||'']);
     });
     rows.push([]);
   }
