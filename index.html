@@ -55,6 +55,16 @@
   .stat-card.amarillo .num { color: var(--amarillo); }
   .stat-card.azul .num { color: var(--azul); }
   .stat-card.rojo .num { color: var(--rojo); }
+  .stat-card.clickable { cursor: pointer; }
+  .stat-card.clickable:hover { background: #e8f5e9; }
+  .stat-dropdown { display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:10000; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; }
+  .stat-dropdown.open { display:flex; }
+  .stat-dropdown-inner { background:white; border-radius:14px; padding:20px; max-width:380px; width:90%; max-height:70vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,0.25); }
+  .stat-dropdown-inner h3 { font-size:1rem; font-weight:700; margin:0 0 12px; }
+  .stat-dropdown-inner ul { list-style:none; padding:0; margin:0; }
+  .stat-dropdown-inner ul li { padding:8px 10px; border-bottom:1px solid #eee; font-size:0.88rem; cursor:pointer; border-radius:6px; }
+  .stat-dropdown-inner ul li:hover { background:#f0f7f0; }
+  .stat-dropdown-close { float:right; background:none; border:none; font-size:1.3rem; cursor:pointer; color:#666; margin-top:-4px; }
 
   /* BARRA DE BÚSQUEDA */
   .search-bar {
@@ -668,9 +678,9 @@
 <div class="resumen-global">
   <h2>📊 Resumen General</h2>
   <div class="stat-card"><div class="num" id="stat-total">28</div><div class="lbl">Áreas verdes</div></div>
-  <div class="stat-card rojo"><div class="num" id="stat-pendiente">—</div><div class="lbl">Sin iniciar</div></div>
-  <div class="stat-card amarillo"><div class="num" id="stat-proceso">—</div><div class="lbl">En proceso</div></div>
-  <div class="stat-card azul"><div class="num" id="stat-completado">—</div><div class="lbl">Completadas</div></div>
+  <div class="stat-card rojo clickable" onclick="abrirListaEstado('pendiente','Sin iniciar')"><div class="num" id="stat-pendiente">—</div><div class="lbl">Sin iniciar</div></div>
+  <div class="stat-card amarillo clickable" onclick="abrirListaEstado('en-proceso','En proceso')"><div class="num" id="stat-proceso">—</div><div class="lbl">En proceso</div></div>
+  <div class="stat-card azul clickable" onclick="abrirListaEstado('completado','Completadas')"><div class="num" id="stat-completado">—</div><div class="lbl">Completadas</div></div>
   <div class="stat-card"><div class="num" id="stat-pct">—</div><div class="lbl">% avance global</div></div>
 </div>
 
@@ -700,8 +710,8 @@
         <p style="color:var(--gris-oscuro);font-size:0.88rem;margin-bottom:16px;">Vista general. Haz clic en un marcador o pestaña para ver la ficha completa de cada área verde.</p>
         <div style="position:relative;">
   <div id="overview-map"></div>
-  <button class="btn-expandir-mapa" id="btn-overview-expand" style="top:8px;right:8px;" title="Ampliar mapa" onclick="(function(btn){var m=document.getElementById('overview-map');m.classList.toggle('expandido');var exp=m.classList.contains('expandido');btn.innerHTML=exp?'✕':'⛶';btn.style.position=exp?'fixed':'absolute';document.body.style.overflow=exp?'hidden':'';setTimeout(function(){if(window._overviewMap)window._overviewMap.invalidateSize();},100);})(this)">⛶</button>
 </div>
+<button class="btn-expandir-mapa" id="btn-overview-expand" style="position:fixed;bottom:70px;right:12px;z-index:9999;" title="Ampliar / reducir mapa" onclick="(function(btn){var m=document.getElementById('overview-map');m.classList.toggle('expandido');var exp=m.classList.contains('expandido');btn.innerHTML=exp?'✕':'⛶';document.body.style.overflow=exp?'hidden':'';setTimeout(function(){if(window._overviewMap)window._overviewMap.invalidateSize();},100);})(this)">⛶</button>
         <div class="overview-grid" id="overview-grid"></div>
       </div>
     </div>
@@ -1499,6 +1509,36 @@ function updateStats() {
   document.getElementById('stat-completado').textContent = completado;
   const avgPct = Math.round(totalPct / total);
   document.getElementById('stat-pct').textContent = (isNaN(avgPct) ? 0 : avgPct) + '%';
+}
+
+
+function abrirListaEstado(estado, titulo) {
+  var lista = document.getElementById('stat-dropdown-list');
+  var title = document.getElementById('stat-dropdown-title');
+  title.textContent = titulo;
+  lista.innerHTML = '';
+  var filtrados = parques.filter(function(p) {
+    var s = state[p.id];
+    if (estado === 'pendiente') return s.estatus === 'pendiente';
+    if (estado === 'en-proceso') return s.estatus === 'en-proceso' || s.estatus === 'avanzado';
+    if (estado === 'completado') return s.estatus === 'completado';
+    return false;
+  });
+  if (filtrados.length === 0) {
+    lista.innerHTML = '<li style="color:#999;">Sin áreas en este estado.</li>';
+  } else {
+    filtrados.forEach(function(p) {
+      var li = document.createElement('li');
+      li.textContent = p.nombre;
+      li.onclick = function() {
+        document.getElementById('stat-dropdown').classList.remove('open');
+        var tab = document.querySelector('.tab-btn[data-id="' + p.id + '"]');
+        if (tab) tab.click();
+      };
+      lista.appendChild(li);
+    });
+  }
+  document.getElementById('stat-dropdown').classList.add('open');
 }
 
 function filterTabs() {
@@ -2381,4 +2421,12 @@ function exportarParqueXLS(pid) {
 })();
 </script>
 
+
+<div class="stat-dropdown" id="stat-dropdown">
+  <div class="stat-dropdown-inner">
+    <button class="stat-dropdown-close" onclick="document.getElementById('stat-dropdown').classList.remove('open')">✕</button>
+    <h3 id="stat-dropdown-title"></h3>
+    <ul id="stat-dropdown-list"></ul>
+  </div>
+</div>
 </body></html>
