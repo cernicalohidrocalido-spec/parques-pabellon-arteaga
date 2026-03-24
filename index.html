@@ -711,7 +711,6 @@
         <div style="position:relative;">
   <div id="overview-map"></div>
 </div>
-<button class="btn-expandir-mapa" id="btn-overview-expand" style="position:fixed;bottom:70px;right:12px;z-index:9999;" title="Ampliar / reducir mapa" onclick="(function(btn){var m=document.getElementById('overview-map');m.classList.toggle('expandido');var exp=m.classList.contains('expandido');btn.innerHTML=exp?'✕':'⛶';document.body.style.overflow=exp?'hidden':'';setTimeout(function(){if(window._overviewMap)window._overviewMap.invalidateSize();},100);})(this)">⛶</button>
         <div class="overview-grid" id="overview-grid"></div>
       </div>
     </div>
@@ -1669,6 +1668,28 @@ function buildOverviewMap() {
   const osmBase  = L.tileLayer(TL.osm.url,  { attribution: TL.osm.attr,  maxZoom: 19 }).addTo(ovMap);
   const satBase  = L.tileLayer(TL.sat.url,  { attribution: TL.sat.attr,  maxZoom: 19 });
   const topoBase = L.tileLayer(TL.topo.url, { attribution: TL.topo.attr, maxZoom: 17 });
+  // Fullscreen control
+  var FullscreenControl = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd: function(map) {
+      var btn = L.DomUtil.create('button', 'leaflet-bar leaflet-control');
+      btn.innerHTML = '⛶';
+      btn.title = 'Pantalla completa';
+      btn.style.cssText = 'width:30px;height:30px;font-size:16px;line-height:28px;text-align:center;cursor:pointer;background:white;border:none;display:block;';
+      L.DomEvent.on(btn, 'click', function(e) {
+        L.DomEvent.stopPropagation(e);
+        var m = document.getElementById('overview-map');
+        m.classList.toggle('expandido');
+        var exp = m.classList.contains('expandido');
+        btn.innerHTML = exp ? '✕' : '⛶';
+        document.body.style.overflow = exp ? 'hidden' : '';
+        setTimeout(function(){ map.invalidateSize(); }, 100);
+      });
+      return btn;
+    }
+  });
+  new FullscreenControl().addTo(ovMap);
+
   L.control.layers({
     '🗺️ Calles (OSM)': osmBase,
     '🛰️ Satélite (Esri)': satBase,
